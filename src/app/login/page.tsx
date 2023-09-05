@@ -24,6 +24,7 @@ const formSchema = z.object({
 });
 
 const Login = () => {
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,13 +39,11 @@ const Login = () => {
     // ✅ This will be type-safe and validated.
     const email = values.email;
     const password = values.password;
-    console.log({email, password})
     const res = await signIn("credentials", {
       email,
       password,
       callbackUrl: "/clinic"
     });
-    console.log(res)
     if(!res?.ok){
       // console.log("salahnya")
       // toast.error("Email atau password salah", {autoClose: 1500})

@@ -5,6 +5,7 @@ import { auth } from "@/lib/firebase";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default NextAuth({
   // Configure one or more authentication providers
@@ -13,10 +14,6 @@ export default NextAuth({
   },
   callbacks: {
     async jwt({ token, user, account }): Promise<JWT> {
-      // console.log(user)
-      // console.log("======== jwt callbacks buka ==========")
-      // console.log(user.providerId)
-      // console.log("======== jwt callbacks tutup ==========")
       if(user){
         token.clinicId = user.clinicId
         token.name = user.name
@@ -46,6 +43,9 @@ export default NextAuth({
       // console.log(user.email)
       return true;
     },
+    async redirect({url, baseUrl}): Promise<string>{
+      return url
+    }
   },
   providers: [
     CredentialsProvider({
@@ -58,17 +58,20 @@ export default NextAuth({
           (credentials as any).email || "",
           (credentials as any).password || ""
         )
-          .then((userCredential) => {
+          .then( async (userCredential) => {
             if (!userCredential.user) return null;
-            console.log("halo masuk sini");
+            const userSnap = await getDoc(doc(db, "user", userCredential.user.uid))
+            if(!userSnap.exists()) return null
+            const userSnapData = userSnap.data()
+            // ! BUAT DATA DIBAWAH POKOKNYA YANG WAJIB AMBIL DARI DB ITU CLINIC ID AJA
             const userData = {
-              clinicId: "1",
+              clinicId: userSnapData.clinic_id,
               email: userCredential.user.email,
               id: userCredential.user.uid,
-              image: userCredential.user.photoURL,
+              image: userSnapData.photoURL,
               isVerified: userCredential.user.emailVerified,
               name: userCredential.user.displayName,
-              role: "admin",
+              role: userSnapData.role,
             };
             return userData;
           })
