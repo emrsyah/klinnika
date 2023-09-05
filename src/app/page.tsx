@@ -6,7 +6,7 @@ import doctor_img from "~/doc_idx.svg";
 
 export default function Home() {
   return (
-    <>
+    <div className={"mx-12 my-8"}>
       <NavUnauthenticated />
       <main className="max-w-screen-xl mx-auto my-14 flex flex-col items-center gap-2">
         <h1 className="text-7xl font-extrabold text-blue-900 mrt text-center">
@@ -28,6 +28,6 @@ export default function Home() {
           className="mt-8"
         />
       </main>
-    </>
+    </div>
   );
 }

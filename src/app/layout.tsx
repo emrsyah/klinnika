@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={"mx-12 my-8"}>
+      <body>
         <SessionProvider>
           {children}
         </SessionProvider>

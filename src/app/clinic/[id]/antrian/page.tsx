@@ -6,10 +6,10 @@ const ClinicApp = () => {
   const {data: session, status} = useSession()
   console.log(session)
   return (
-    <>
+    <div>
     <div>ClinicApp - {session?.user?.id}</div>
     <div>{status}</div>
-    </>
+    </div>
   )
 }
 
