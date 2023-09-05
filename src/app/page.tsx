@@ -1,14 +1,12 @@
 import NextImage from "@/components/NextImage";
-import AuthLoading from "@/components/auth/AuthLoading";
 import NavUnauthenticated from "@/components/layout/NavUnauthenticated";
 import { Button } from "@/components/ui/button";
-import { Role } from "@/types/nextauth";
+
 import doctor_img from "~/doc_idx.svg";
 
 export default function Home() {
   return (
     <>
-    <AuthLoading role={"admin" as Role} isPublic={true}>
       <NavUnauthenticated />
       <main className="max-w-screen-xl mx-auto my-14 flex flex-col items-center gap-2">
         <h1 className="text-7xl font-extrabold text-blue-900 mrt text-center">
@@ -30,7 +28,6 @@ export default function Home() {
           className="mt-8"
         />
       </main>
-    </AuthLoading>
     </>
   );
 }

@@ -3,9 +3,8 @@ import { useSession } from "next-auth/react";
 import * as React from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Role } from "@/types/nextauth";
 
-const HOME_ROUTE = "/";
+const HOME_ROUTE = "/test";
 /**
  * Add role-based access control to a component
  *
@@ -13,17 +12,12 @@ const HOME_ROUTE = "/";
  * @see https://github.com/mxthevs/nextjs-auth/blob/main/src/components/withAuth.tsx
  */
 
-const AuthLoading = ({
-  children,
-  role,
-  isPublic = false
-}: {
-  children: React.ReactNode;
-  role: Role;
-  isPublic?: boolean
-}) => {
-  const { push, back } = useRouter();
-  const [isLoading, setIsLoading] = React.useState(true);
+// TODOS - CEK: https://smy.hashnode.dev/authenticated-protected-role-based-routing-using-nextjs-and-hoc
+// TODOS - CEK: https://codevoweb.com/setup-and-use-nextauth-in-nextjs-13-app-directory/
+// TODOS - CEK: https://reacthustle.com/blog/nextjs-setup-role-based-authentication
+
+const AuthLoading = ({ children }: { children: React.ReactNode }) => {
+  const { push } = useRouter();
 
   const { data: session } = useSession({
     required: true,
@@ -34,27 +28,17 @@ const AuthLoading = ({
   });
 
   const isUser = !!session?.user;
-  const user = session?.user;
-  if (isUser) {
-    if (user) {
-      if (role === user.role) {
-        setIsLoading(false)
-      } else{
-        back()
-      }
-    }
-  }
 
   return (
     <>
-      {isLoading && !isPublic ? (
+      {isUser ? (
+        children
+      ) : (
         <div className="flex min-h-screen flex-col items-center justify-center gap-2">
           <h1>Klinnika</h1>
           <span className="text-lg font-bold">Loading...</span>
           <Loader2 className="animate-spin text-2xl" />
         </div>
-      ) : (
-        children
       )}
     </>
   );

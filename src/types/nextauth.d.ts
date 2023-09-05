@@ -1,17 +1,18 @@
 // nextauth.d.ts
 
-export enum Role {
-  admin = "admin",
-  cashier = "cashier",
-  inventary = "cashier",
+import { Role } from "@/constant/role";
+import { DefaultSession, DefaultUser } from "next-auth";
+import { JWT } from "next-auth/jwt";
+
+interface IUser extends DefaultUser {
+  role: Role;
+  isVerified: boolean,
+  id: string;
+  clinicId: number;
 }
 
 declare module "next-auth" {
-  interface User {
-    role: Role;
-    id: number;
-    clinicId: number;
-  }
+  interface User extends IUser {}
 
   interface Session extends DefaultSession {
     user?: User;
@@ -19,11 +20,7 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
-  interface JWT {
-    role: Role;
-    id: number;
-    clinicId: number;
-  }
+  interface JWT extends IUser  {}
 }
 
 // interface IUser extends DefaultUser {
