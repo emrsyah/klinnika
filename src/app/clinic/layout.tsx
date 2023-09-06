@@ -7,7 +7,7 @@ import React from "react";
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthLoading>
-      <div className="min-h-screen w-screen flex">
+      <div className="min-h-screen w-screen flex overflow-x-hidden">
         <SidebarClinic />
         <div className="flex-1">
           <div className="p-5 h-16 border-b flex items-center justify-between">
