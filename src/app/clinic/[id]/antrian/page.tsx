@@ -1,7 +1,8 @@
-// "use client"
+"use client"
 import React from "react";
 import { DataTable } from "@/components/table/DataTable";
 import { Queue, columns } from "./columns";
+import { useSession } from "next-auth/react";
 
 const data: Queue[] = [
   {
@@ -167,6 +168,8 @@ const data: Queue[] = [
 ];
 
 const ClinicApp = () => {
+  const {data: session} = useSession()
+  console.log(session)
   return (
     <div>
       <DataTable filterLabel="nama pasien" filterValue="name" columns={columns} data={data} />

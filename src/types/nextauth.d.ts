@@ -8,7 +8,7 @@ interface IUser extends DefaultUser {
   role: Role;
   isVerified: boolean,
   id: string;
-  clinicId: number;
+  clinicId: string;
 }
 
 declare module "next-auth" {

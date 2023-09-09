@@ -1,6 +1,9 @@
 "use client";
 import React from "react";
 import ClinicIcon from "@/components/ClinicIcon";
+import { Button } from "@/components/ui/button";
+import { db } from "@/lib/firebase";
+
 import {
   Archive,
   Banknote,
@@ -13,6 +16,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
+import { useDocumentData } from 'react-firebase-hooks/firestore';
+import { doc } from "firebase/firestore";
 
 const mainSidebar = [
   {
@@ -82,10 +88,20 @@ const extractIcon = (name: string) => {
 const SidebarClinic = () => {
   const pathname = usePathname();
   const currentPath = pathname?.split("/")[3];
+  const {data: session} = useSession()
+
+  console.log(session?.user?.clinicId)
+
+  const [value, loading, error] = useDocumentData(
+    doc(db, "clinic", session?.user?.clinicId as string)
+  )
+
+  console.log(value)
+
   return (
-    <nav className="min-h-screen py-6 border-r w-60 flex flex-col">
+    <nav className="h-screen sticky top-0 left-0 py-6 border-r w-60 flex flex-col">
       <div className="border-b px-6 pb-4">
-        <ClinicIcon name="Klk Margahayu" />
+        <ClinicIcon name={value?.name ? value.name : "Loading..."} />
       </div>
 
       <div className="flex flex-col pl-6 py-4 gap-4">
@@ -127,6 +143,8 @@ const SidebarClinic = () => {
             </Link>
           ))}
         </div>
+
+        <Button onClick={() => signOut()} variant={"ghost"}>Keluar</Button>
 
       </div>
     </nav>
