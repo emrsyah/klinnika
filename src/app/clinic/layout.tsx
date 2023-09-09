@@ -10,7 +10,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <SidebarClinic />
         <div className="flex-1">
           <HeaderClinic />
-          <div className="p-8">{children}</div>
+          <div className="px-8 py-4">{children}</div>
         </div>
       </div>
     </AuthLoading>

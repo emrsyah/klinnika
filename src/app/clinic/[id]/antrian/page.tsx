@@ -3,6 +3,9 @@ import React from "react";
 import { DataTable } from "@/components/table/DataTable";
 import { Queue, columns } from "./columns";
 import { useSession } from "next-auth/react";
+import { useCollectionData } from "react-firebase-hooks/firestore";
+import { collection } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const data: Queue[] = [
   {
@@ -169,10 +172,12 @@ const data: Queue[] = [
 
 const ClinicApp = () => {
   const {data: session} = useSession()
-  console.log(session)
+  const [value, loading, error] = useCollectionData(collection(db, "queue"))
+  
+  console.log(value)
   return (
     <div>
-      <DataTable filterLabel="nama pasien" filterValue="name" columns={columns} data={data} />
+      <DataTable isLoading={loading} isError={error ? error.message : ""} filterLabel="nama pasien" filterValue="name" columns={columns} data={data} />
     </div>
   );
 };
