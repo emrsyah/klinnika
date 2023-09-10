@@ -17,7 +17,8 @@ export type Queue = {
     | "Selesai"
     | "Dalam Proses"
     | "Menunggu"
-    | "Menunggu Pembayaran";
+    | "Menunggu Pembayaran"
+    | "Scheduled";
   createdAt: string;
 };
 
@@ -27,21 +28,21 @@ export const columns: ColumnDef<Queue>[] = [
     header: ({ column }) => <ColumnHeader column={column} title="Id" />,
   },
   {
-    accessorKey: "name",
+    accessorKey: "user.name",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Nama Pasien" />
     ),
   },
   {
-    accessorKey: "nik",
+    accessorKey: "user.id",
     header: "NIK",
   },
   {
-    accessorKey: "phone",
+    accessorKey: "user.phone",
     header: "Kontak",
   },
   {
-    accessorKey: "status",
+    accessorKey: "type",
     header: "Status",
   },
   {

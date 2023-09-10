@@ -1,11 +1,13 @@
-"use client"
+"use client";
 import React from "react";
 import { DataTable } from "@/components/table/DataTable";
 import { Queue, columns } from "./columns";
 import { useSession } from "next-auth/react";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { collection } from "firebase/firestore";
+import { collection, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useQueueData } from "./useQueueData";
+// import useQueueData from "./useQueueData";
 
 const data: Queue[] = [
   {
@@ -171,13 +173,21 @@ const data: Queue[] = [
 ];
 
 const ClinicApp = () => {
-  const {data: session} = useSession()
-  const [value, loading, error] = useCollectionData(collection(db, "queue"))
-  
-  console.log(value)
+  const { data: session } = useSession();
+  // const [value, loading, error] = useCollectionData(collection(db, "queue"));
+  // const queueData = await collection
+  const {combinedData, error, loading} = useQueueData()
+
   return (
     <div>
-      <DataTable isLoading={loading} isError={error ? error.message : ""} filterLabel="nama pasien" filterValue="name" columns={columns} data={data} />
+      <DataTable
+        isLoading={loading}
+        isError={error ? error : ""}
+        filterLabel="nama pasien"
+        filterValue="name"
+        columns={columns}
+        data={combinedData}
+      />
     </div>
   );
 };

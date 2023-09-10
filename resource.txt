@@ -1,2 +1,17 @@
 NEXT-AUTH:
 1. https://codevoweb.com/setup-and-use-nextauth-in-nextjs-13-app-directory/
+
+RX 101:
+1. https://ngserve.io/rxjs-tutorial-understanding-the-basics/
+
+
+export const ObservableFromRef = (
+  ref: CollectionReference<DocumentData, DocumentData>
+) => {
+  return new Observable((subscriber) => {
+    const unsubscribe = onSnapshot(ref, (snapshot) =>
+      subscriber.next(snapshot)
+    );
+    return () => unsubscribe();
+  });
+};
