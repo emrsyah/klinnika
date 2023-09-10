@@ -20,6 +20,7 @@ export type Queue = {
     | "Menunggu Pembayaran"
     | "Scheduled";
   createdAt: string;
+  appointmentDate: string;
 };
 
 export const columns: ColumnDef<Queue>[] = [
@@ -33,10 +34,10 @@ export const columns: ColumnDef<Queue>[] = [
       <ColumnHeader column={column} title="Nama Pasien" />
     ),
   },
-  {
-    accessorKey: "user.id",
-    header: "NIK",
-  },
+  // {
+  //   accessorKey: "user.nik",
+  //   header: "NIK",
+  // },
   {
     accessorKey: "user.phone",
     header: "Kontak",
@@ -46,12 +47,21 @@ export const columns: ColumnDef<Queue>[] = [
     header: "Status",
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Daftar" />
     ),
     cell: ({ row }) => {
-      return <div>{dateConverter(row.getValue("createdAt"))}</div>;
+      return <div>{dateConverter(row.getValue("created_at"))}</div>;
+    },
+  },
+  {
+    accessorKey: "appointment_date",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Tanggal Janji" />
+    ),
+    cell: ({ row }) => {
+      return <div>{dateConverter(row.getValue("appointment_date"))}</div>;
     },
   },
 ];

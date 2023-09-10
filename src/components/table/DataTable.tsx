@@ -15,7 +15,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -42,6 +44,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Layers, Plus } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -60,12 +63,18 @@ export function DataTable<TData, TValue>({
   isLoading,
   isError,
 }: DataTableProps<TData, TValue>) {
+  const params = useSearchParams()!
+  const pathname = usePathname()
+  const router = useRouter()
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
+  
+  const [mode, setMode] = React.useState(params?.get("mode") ? (params.get("mode") === "focus" || params.get("mode") === "all") ? params.get("mode") : "focus" : "focus");
 
   const table = useReactTable({
     data,
@@ -84,13 +93,20 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const changeModeHandler = (value: string) => {
+    setMode(value)
+    const searchParams = new URLSearchParams(params)
+    searchParams.set("mode", value)
+    router.push(pathname as string + "?" + searchParams.toString())
+  }
+
   return (
     <>
       <div className="flex justify-between items-center py-4">
-        <div className="flex-grow w-full">
+        <div className="flex-grow w-full flit gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto flit gap-2">
+              <Button variant="outline" className="flit gap-2">
                 <Layers width={16} />
                 Tampilan
               </Button>
@@ -115,6 +131,17 @@ export function DataTable<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Select value={mode as string} onValueChange={changeModeHandler}>
+            <SelectTrigger className="w-fit gap-2 font-semibold text-blue-900">
+              <SelectValue className="whitespace-nowrap" placeholder="Mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="focus">Mode Fokus</SelectItem>
+                <SelectItem value="all">Semuanya</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flit gap-4 w-full">
           <Input

@@ -4,18 +4,12 @@ import {
   collection,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
+  orderBy,
+  query,
+  where,
 } from "firebase/firestore";
-import {
-  catchError,
-  combineLatest,
-  from,
-  map,
-  Observable,
-  of,
-  startWith,
-} from "rxjs";
+import { catchError, combineLatest, from, map, of, startWith } from "rxjs";
 
 interface DocumentWithUser<T> {
   id: string;
@@ -38,13 +32,34 @@ function getUserData(patient_id: string) {
   );
 }
 
-export function useQueueData() {
+export function useQueueData(params: string) {
   const [combinedData, setCombinedData] = React.useState<any[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
 
+  //   URUSIN ORDERBY APPOINTMENT DATE
+
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "queue"), (snapshot) => {
+    let today = new Date();
+    today.setHours(0, 0, 0, 0);
+    let tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    today.setHours(0, 0, 0, 0);
+    let todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+    let q = query(
+      collection(db, "queue"),
+      orderBy("appointment_date", "desc"),
+      orderBy("created_at", "asc")
+    );
+    if (params === "focus") {
+      q = query(
+        q,
+        where("appointment_date", ">=", today),
+        where("appointment_date", "<=", todayEnd)
+      );
+    }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const observables = snapshot.docs.map((doc) => {
         const data = doc.data();
         const patientId = data.patient_id;
@@ -77,7 +92,7 @@ export function useQueueData() {
         });
     });
     return () => unsubscribe();
-  }, []);
-  console.log(combinedData)
-  return {combinedData, loading, error};
+  }, [params]);
+  console.log(combinedData);
+  return { combinedData, loading, error };
 }
