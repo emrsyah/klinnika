@@ -112,6 +112,8 @@ const patientSelectableConverter: FirestoreDataConverter<Selectable<string>> = {
   ): Selectable<string> {
     const data = snapshot.data(options);
     return {
+      // id: snapshot.id,
+      ...data,
       label: data.name,
       value: snapshot.id,
     };
@@ -120,7 +122,7 @@ const patientSelectableConverter: FirestoreDataConverter<Selectable<string>> = {
 
 const AntrianNew = () => {
   const { data } = useSession();
-  
+
   const patientRef = query(
     collection(db, "patient"),
     where("clinic_id", "==", data?.user?.clinicId)
@@ -142,7 +144,33 @@ const AntrianNew = () => {
     console.log(values);
   };
 
-  const changePatientHandler = () => {};
+  const resetPatient = () => {
+    form.setValue("patient", {
+      name: "",
+      gender: "Laki-laki",
+      phone: "",
+      nik: "",
+      email: "",
+      birthDate: new Date(),
+    });
+  };
+
+  const changePatientHandler = (val: any) => {
+    // console.log(val);
+    if (!val) {
+      resetPatient();
+      return;
+    }
+    console.log(val.gender)
+    form.setValue("patient", {
+      name: val.name ?? "",
+      gender: val.gender ?? "Laki-laki",
+      phone: val.phone ?? "",
+      nik: val.nik ?? "",
+      email: val.email ?? "",
+      birthDate: val.birth_date ?? new Date(),
+    });
+  };
 
   return (
     <>
@@ -193,6 +221,7 @@ const AntrianNew = () => {
                     <Select
                       onValueChange={field.onChange}
                       //   defaultValue={"Hari Ini"}
+                      value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
