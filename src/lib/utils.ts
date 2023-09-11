@@ -18,3 +18,11 @@ export  function dateConverter(date: Timestamp){
   }
   return dayjs(d).format("DD MMM")
 }
+
+export  function dateConverterAppointment(date: Timestamp){
+  const d = (date ? date.toDate() : new Date())
+  if(dayjs(d).isToday()){
+    return "Hari Ini"
+  }
+  return dayjs(d).format("DD MMM")
+}

@@ -1,0 +1,349 @@
+"use client";
+import { Separator } from "@/components/ui/separator";
+import React from "react";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { CalendarIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import dayjs from "dayjs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import ReactSelect from "react-select";
+import { Textarea } from "@/components/ui/textarea";
+
+const formSchema = z.object({
+  patient: z.object({
+    name: z.string().min(5, { message: "nama minimal 5 huruf" }),
+    email: z
+      .string()
+      .email({ message: "masukkan email yang valid" })
+      .optional(),
+    nik: z
+      .string()
+      .length(16, { message: "masukkan nik yang valid" })
+      .optional(),
+    phone: z.string({ required_error: "nomor telepon wajib dimasukkan" }),
+    birthDate: z.date({ required_error: "tanggal lahir wajib dimasukkan" }),
+  }),
+  complaint: z.object({
+    description: z.string().optional(),
+    appointmentDate: z.string({ required_error: "wajib memilih tanggal" }),
+    doctorId: z.string({ required_error: "wajib memilih dokter" }),
+    complaintType: z
+      .array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+        })
+      )
+      .min(1, { message: "minimal memilih 1 tipe komplain" }),
+    queueType: z.enum(["BPJS", "Regular"], {
+      required_error: "wajib memilih 1 tipe antrian",
+    }),
+  }),
+});
+
+const keluhanType = [
+  { value: "chocolate", label: "Chocolate" },
+  { value: "strawberry", label: "Strawberry" },
+  { value: "vanilla", label: "Vanilla" },
+];
+
+const AntrianNew = () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    // defaultValues: {
+    //   username: "",
+    // },
+  });
+
+  // 2. Define a submit handler.
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(values);
+  }
+  return (
+    <>
+      <h1 className="font-bold text-xl mrt text-blue-400">
+        Tambah Antrian Baru
+      </h1>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="border rounded-sm p-4 flex flex-col w-full gap-2 mt-2"
+        >
+          <div className="flex flex-col gap-2">
+            <h2 className="formSubTitle">Data Pasien</h2>
+            <Separator />
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <FormField
+                control={form.control}
+                name="patient.name"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>
+                      Nama<span className="text-red-600">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="nama pasien" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="patient.phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Nomor Telepon<span className="text-red-600">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="08" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="patient.birthDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-1 justify-end">
+                    <FormLabel>
+                      Tanggal Lahir<span className="text-red-600">*</span>
+                    </FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              dayjs(field.value).format("DD MMM, YYYY")
+                            ) : (
+                              <span>Pilih Tanggal</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        {/* <Calendar
+                          captionLayout="dropdown"
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        /> */}
+                        <input
+                          type="date"
+                          className="datepicker-input"
+                          value={
+                            field.value
+                              ? dayjs(field.value).format("YYYY-MM-DD")
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              dayjs(e.currentTarget.value).toDate()
+                            )
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="patient.email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="pasien@something.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="patient.nik"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>NIK</FormLabel>
+                    <FormControl>
+                      <Input placeholder="NIK pasien" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          <Separator className="my-5" />
+          <div className="flex flex-col gap-2">
+            <h2 className="formSubTitle">Data Keluhan</h2>
+            <Separator />
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <FormField
+                control={form.control}
+                name="complaint.appointmentDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Pilih Hari<span className="text-red-600">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      //   defaultValue={"Hari Ini"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Hari" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Hari Ini">Hari Ini</SelectItem>
+                        <SelectItem value="Besok">Besok</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="complaint.doctorId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Dokter<span className="text-red-600">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      //   defaultValue={""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Dokter" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Hari Ini">Hari Ini</SelectItem>
+                        <SelectItem value="Besok">Besok</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="complaint.queueType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tipe Antrian<span className="text-red-600">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      //   defaultValue={""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Tipe Antrian" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Regular">Regular</SelectItem>
+                        <SelectItem value="BPJS">BPJS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="complaint.complaintType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipe Keluhan</FormLabel>
+                    <FormControl>
+                      <ReactSelect
+                        onChange={(val) => field.onChange(val)}
+                        options={keluhanType}
+                        isMulti
+                        isClearable
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="complaint.description"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Deskripsi</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell us a little bit about yourself"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Tambahkan deskripsi komplain di atas
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          <Button className="mt-4" type="submit">
+            Konfirmasi & Tambah
+          </Button>
+        </form>
+      </Form>
+    </>
+  );
+};
+
+export default AntrianNew;

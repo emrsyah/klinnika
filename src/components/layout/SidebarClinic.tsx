@@ -88,6 +88,7 @@ const extractIcon = (name: string) => {
 const SidebarClinic = () => {
   const pathname = usePathname();
   const currentPath = pathname?.split("/")[3];
+  const basePath = (pathname?.split("/").slice(1, 3).join("/"))
   const {data: session} = useSession()
 
   console.log(session?.user?.clinicId)
@@ -112,7 +113,7 @@ const SidebarClinic = () => {
           {mainSidebar.map((sidebar) => (
             <Link
               key={sidebar.name}
-              href={sidebar.href}
+              href={`/${basePath}/${sidebar.href}`}
               className={`flit gap-3 mrt font-semibold p-3 cursor-pointer rounded-bl rounded-tl ${
                 sidebar.href === currentPath
                   ? "text-blue-900 bg-blue-50"

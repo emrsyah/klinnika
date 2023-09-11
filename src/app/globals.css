@@ -68,6 +68,19 @@
   }
 }
 
+.rdp [aria-hidden="true"] {
+  @apply hidden;
+}
+
+.rdp-vhidden {
+  @apply hidden;
+}
+
+select::-webkit-scrollbar {
+  display: none;
+}
+
+
 @layer base {
   * {
     @apply border-border;
@@ -78,6 +91,9 @@
   .flit{
     @apply flex items-center
   }
+  .formSubTitle {
+    @apply mrt text-lg font-bold text-blue-900
+  }
 }
 
 * {
@@ -87,3 +103,5 @@
 .mrt{
   font-family: "Montserrat";
 }
+
+

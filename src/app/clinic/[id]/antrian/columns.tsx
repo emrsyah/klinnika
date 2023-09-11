@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import dayjs from "dayjs";
 import { ColumnHeader } from "@/components/table/ColumnHeader";
-import { dateConverter } from "@/lib/utils";
+import { dateConverter, dateConverterAppointment } from "@/lib/utils";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -61,7 +61,7 @@ export const columns: ColumnDef<Queue>[] = [
       <ColumnHeader column={column} title="Tanggal Janji" />
     ),
     cell: ({ row }) => {
-      return <div>{dateConverter(row.getValue("appointment_date"))}</div>;
+      return <div>{dateConverterAppointment(row.getValue("appointment_date"))}</div>;
     },
   },
 ];

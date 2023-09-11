@@ -154,7 +154,7 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <Button size={"sm"} className="w-fit gap-2 whitespace-nowrap">
+          <Button onClick={() => router.push(pathname + "/new")} size={"sm"} className="w-fit gap-2 whitespace-nowrap">
             <Plus size={20} />
             Tambahkan Baru
           </Button>
@@ -203,8 +203,9 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+                  onClick={() => router.push(pathname! + "/" + row.getValue("id"))}
                   data-state={row.getIsSelected() && "selected"}
-                  className="font-medium"
+                  className="font-medium hover:bg-blue-50 cursor-pointer hover:text-blue-900"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
