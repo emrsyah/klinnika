@@ -23,7 +23,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import {
@@ -50,6 +49,7 @@ import {
 import { useSession } from "next-auth/react";
 import { queueFormSchema } from "@/lib/validation/form";
 import toast from "react-hot-toast";
+import { usePathname, useRouter } from "next/navigation";
 
 const keluhanType = [
   { value: "Demam", label: "Demam" },
@@ -89,8 +89,12 @@ const selectableConverter: FirestoreDataConverter<Selectable<string>> = {
 };
 
 const AntrianNew = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const backUrl = pathname?.split("/").slice(1, 4).join("/");
   const { data } = useSession();
   const [isOldPatient, setIsOldPatient] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   const patientRef = query(
     collection(db, "patient"),
@@ -119,6 +123,7 @@ const AntrianNew = () => {
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof queueFormSchema>) => {
+    setLoading(true);
     let patientId = isOldPatient ? values.patient.id : "";
     const toastId = toast.loading("Sedang Menambahkan Data...");
     try {
@@ -134,28 +139,31 @@ const AntrianNew = () => {
         const newPatientId = await axios.post("/api/pasien", {
           ...formattedPatient,
         });
-        patientId = newPatientId.data
+        patientId = newPatientId.data;
       }
       const formattedQueue = {
         complaint: {
           ...values.complaint,
         },
         userId: patientId,
-        clinicId: data?.user?.clinicId
+        clinicId: data?.user?.clinicId,
       };
-      
-      const newQueue = await axios.post("/api/antrian", {
-        ...formattedQueue
+
+      await axios.post("/api/antrian", {
+        ...formattedQueue,
       });
       toast.success("Berhasil Menambahkan Data", {
         id: toastId,
       });
-      console.log(newQueue.data)
+      router.push(`/${backUrl}`);
+      // console.log(newQueue.data);
     } catch (err) {
       toast.error("Gagal Menambahkan Data", {
         id: toastId,
       });
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -213,7 +221,7 @@ const AntrianNew = () => {
             <div className="flit justify-between">
               <h2 className="formSubTitle">Data Pasien</h2>
               <ReactSelect
-                isDisabled={loadingPatient}
+                isDisabled={loadingPatient || loading}
                 placeholder={
                   loadingPatient ? "Mengambil data..." : "Pilih Pasien"
                 }
@@ -225,6 +233,7 @@ const AntrianNew = () => {
             <Separator />
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="patient.name"
                 render={({ field }) => (
@@ -235,7 +244,7 @@ const AntrianNew = () => {
                     <FormControl>
                       <Input
                         // value={field.value}
-                        disabled={isOldPatient}
+                        disabled={isOldPatient || loading}
                         placeholder="nama pasien"
                         {...field}
                       />
@@ -245,6 +254,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="patient.gender"
                 render={({ field }) => (
@@ -253,7 +263,7 @@ const AntrianNew = () => {
                       Pilih Gender<span className="text-red-600">*</span>
                     </FormLabel>
                     <Select
-                      disabled={isOldPatient}
+                      disabled={isOldPatient || loading}
                       onValueChange={field.onChange}
                       //   defaultValue={"Hari Ini"}
                       value={field.value}
@@ -273,6 +283,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="patient.phone"
                 render={({ field }) => (
@@ -282,7 +293,7 @@ const AntrianNew = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isOldPatient}
+                        disabled={isOldPatient || loading}
                         placeholder="08"
                         {...field}
                       />
@@ -292,6 +303,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="patient.birthDate"
                 render={({ field }) => (
@@ -300,7 +312,10 @@ const AntrianNew = () => {
                       Tanggal Lahir<span className="text-red-600">*</span>
                     </FormLabel>
                     <Popover>
-                      <PopoverTrigger disabled={isOldPatient} asChild>
+                      <PopoverTrigger
+                        disabled={isOldPatient || loading}
+                        asChild
+                      >
                         <FormControl>
                           <Button
                             variant={"outline"}
@@ -320,7 +335,7 @@ const AntrianNew = () => {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <input
-                          disabled={isOldPatient}
+                          disabled={isOldPatient || loading}
                           type="date"
                           className="datepicker-input"
                           value={
@@ -341,6 +356,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="patient.email"
                 render={({ field }) => (
@@ -348,7 +364,7 @@ const AntrianNew = () => {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isOldPatient}
+                        disabled={isOldPatient || loading}
                         placeholder="pasien@something.com"
                         {...field}
                       />
@@ -358,6 +374,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="patient.nik"
                 render={({ field }) => (
@@ -365,7 +382,7 @@ const AntrianNew = () => {
                     <FormLabel>NIK</FormLabel>
                     <FormControl>
                       <Input
-                        disabled={isOldPatient}
+                        disabled={isOldPatient || loading}
                         placeholder="NIK pasien"
                         {...field}
                       />
@@ -382,6 +399,7 @@ const AntrianNew = () => {
             <Separator />
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="complaint.appointmentDate"
                 render={({ field }) => (
@@ -390,6 +408,7 @@ const AntrianNew = () => {
                       Pilih Hari<span className="text-red-600">*</span>
                     </FormLabel>
                     <Select
+                      disabled={loading}
                       onValueChange={field.onChange}
                       //   defaultValue={"Hari Ini"}
                     >
@@ -417,7 +436,7 @@ const AntrianNew = () => {
                     </FormLabel>
                     <FormControl>
                       <ReactSelect
-                        isDisabled={loadingDoctor}
+                        isDisabled={loadingDoctor || loading}
                         placeholder={
                           loadingDoctor ? "Mengambil data..." : "Pilih Dokter"
                         }
@@ -431,6 +450,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="complaint.queueType"
                 render={({ field }) => (
@@ -439,6 +459,7 @@ const AntrianNew = () => {
                       Tipe Antrian<span className="text-red-600">*</span>
                     </FormLabel>
                     <Select
+                      disabled={loading}
                       onValueChange={field.onChange}
                       //   defaultValue={""}
                     >
@@ -457,6 +478,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="complaint.complaintType"
                 render={({ field }) => (
@@ -466,6 +488,7 @@ const AntrianNew = () => {
                     </FormLabel>
                     <FormControl>
                       <ReactSelect
+                        isDisabled={loading}
                         onChange={(val) => field.onChange(val)}
                         options={keluhanType}
                         isMulti
@@ -477,6 +500,7 @@ const AntrianNew = () => {
                 )}
               />
               <FormField
+                disabled={loading}
                 control={form.control}
                 name="complaint.description"
                 render={({ field }) => (
@@ -484,6 +508,7 @@ const AntrianNew = () => {
                     <FormLabel>Deskripsi</FormLabel>
                     <FormControl>
                       <Textarea
+                        disabled={loading}
                         placeholder="Tell us a little bit about yourself"
                         className="resize-none"
                         {...field}
@@ -498,7 +523,7 @@ const AntrianNew = () => {
               />
             </div>
           </div>
-          <Button className="mt-4" type="submit">
+          <Button disabled={loading} className="mt-4" type="submit">
             Konfirmasi & Tambah
           </Button>
         </form>

@@ -4,6 +4,9 @@ NEXT-AUTH:
 RX 101:
 1. https://ngserve.io/rxjs-tutorial-understanding-the-basics/
 
+TW:
+1. https://renatopozzi.me/articles/create-react-components-with-tailwind-like-a-pro
+
 
 export const ObservableFromRef = (
   ref: CollectionReference<DocumentData, DocumentData>

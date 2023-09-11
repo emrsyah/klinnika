@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import * as React from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import AppIcon from "@/components/AppIcon";
 
 const HOME_ROUTE = "/test";
 /**
@@ -34,8 +35,8 @@ const AuthLoading = ({ children }: { children: React.ReactNode }) => {
       {isUser ? (
         children
       ) : (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-2">
-          <h1>Klinnika</h1>
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+          <AppIcon />
           <span className="text-lg font-bold">Loading...</span>
           <Loader2 className="animate-spin text-2xl" />
         </div>
