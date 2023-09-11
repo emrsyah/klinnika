@@ -1,6 +1,6 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
-import React from "react";
+import * as React from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -48,27 +48,47 @@ import {
 } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 
+const isEmail = (value: string) => {
+  // You can use a regular expression or any other method to validate the email format
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+  return emailRegex.test(value);
+};
+
 const formSchema = z.object({
   patient: z.object({
     name: z.string().min(5, { message: "nama minimal 5 huruf" }),
     email: z
       .string()
-      .email({ message: "masukkan email yang valid" })
+      .transform((value) => (value === "" ? undefined : value.trim())) // Trim whitespace and treat empty string as undefined
+      .refine((value) => value === undefined || isEmail(value), {
+        message: "masukkan email yang valid",
+      })
       .optional(),
     nik: z
       .string()
-      .length(16, { message: "masukkan nik yang valid" })
+      .transform((value) => (value === "" ? undefined : value.trim())) // Trim whitespace and treat empty string as undefined
+      .refine((value) => value === undefined || value.length === 16, {
+        message: "masukkan nik yang valid",
+      })
       .optional(),
     gender: z.enum(["Laki-laki", "Perempuan"], {
       required_error: "gender wajib diisi",
     }),
-    phone: z.string({ required_error: "nomor telepon wajib dimasukkan" }),
+    phone: z
+      .string({ required_error: "nomor telepon wajib dimasukkan" })
+      .trim(),
     birthDate: z.date({ required_error: "tanggal lahir wajib dimasukkan" }),
   }),
   complaint: z.object({
     description: z.string().optional(),
     appointmentDate: z.string({ required_error: "wajib memilih tanggal" }),
-    doctorId: z.string({ required_error: "wajib memilih dokter" }),
+    doctor: z.object(
+      {
+        label: z.string(),
+        value: z.string(),
+      },
+      { required_error: "wajib memilih dokter" }
+    ),
     complaintType: z
       .array(
         z.object({
@@ -100,7 +120,7 @@ interface Selectable<T> {
   value: T;
 }
 
-const patientSelectableConverter: FirestoreDataConverter<Selectable<string>> = {
+const selectableConverter: FirestoreDataConverter<Selectable<string>> = {
   toFirestore(
     patientSelectable: WithFieldValue<Selectable<string>>
   ): DocumentData {
@@ -122,19 +142,31 @@ const patientSelectableConverter: FirestoreDataConverter<Selectable<string>> = {
 
 const AntrianNew = () => {
   const { data } = useSession();
+  const [isOldPatient, setIsOldPatient] = React.useState<boolean>(false);
 
   const patientRef = query(
     collection(db, "patient"),
     where("clinic_id", "==", data?.user?.clinicId)
-  ).withConverter(patientSelectableConverter);
+  ).withConverter(selectableConverter);
 
-  const [patients, loading, error] = useCollectionData(patientRef);
+  const doctorRef = query(
+    collection(db, "user"),
+    where("clinic_id", "==", data?.user?.clinicId),
+    where("role", "==", "doctor")
+  ).withConverter(selectableConverter);
+
+  const [patients, loadingPatient, errorPatient] =
+    useCollectionData(patientRef);
+  const [doctors, loadingDoctor, errorDoctor] = useCollectionData(doctorRef);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    // defaultValues: {
-    //   username: "",
-    // },
+    defaultValues: {
+      patient: {
+        nik: "",
+        email: "",
+      },
+    },
   });
 
   // 2. Define a submit handler.
@@ -145,31 +177,41 @@ const AntrianNew = () => {
   };
 
   const resetPatient = () => {
-    form.setValue("patient", {
-      name: "",
-      gender: "Laki-laki",
-      phone: "",
-      nik: "",
-      email: "",
-      birthDate: new Date(),
-    });
+    form.setValue(
+      "patient",
+      {
+        name: "",
+        gender: "Laki-laki",
+        phone: "",
+        nik: "",
+        email: "",
+        birthDate: new Date(),
+      },
+      { shouldDirty: false }
+    );
+    // form.resetField("patient");
   };
 
   const changePatientHandler = (val: any) => {
     // console.log(val);
     if (!val) {
+      setIsOldPatient(false);
       resetPatient();
       return;
     }
-    console.log(val.gender)
-    form.setValue("patient", {
-      name: val.name ?? "",
-      gender: val.gender ?? "Laki-laki",
-      phone: val.phone ?? "",
-      nik: val.nik ?? "",
-      email: val.email ?? "",
-      birthDate: val.birth_date ?? new Date(),
-    });
+    setIsOldPatient(true);
+    form.setValue(
+      "patient",
+      {
+        name: val.name ?? "",
+        gender: val.gender ?? "Laki-laki",
+        phone: val.phone ?? "",
+        nik: val.nik ?? "",
+        email: val.email ?? "",
+        birthDate: val.birth_date.toDate() ?? new Date(),
+      },
+      { shouldValidate: true }
+    );
   };
 
   return (
@@ -186,8 +228,10 @@ const AntrianNew = () => {
             <div className="flit justify-between">
               <h2 className="formSubTitle">Data Pasien</h2>
               <ReactSelect
-                isDisabled={loading}
-                placeholder={loading ? "Mengambil data..." : "Pilih Pasien"}
+                isDisabled={loadingPatient}
+                placeholder={
+                  loadingPatient ? "Mengambil data..." : "Pilih Pasien"
+                }
                 onChange={changePatientHandler}
                 options={patients}
                 isClearable
@@ -204,7 +248,12 @@ const AntrianNew = () => {
                       Nama<span className="text-red-600">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="nama pasien" {...field} />
+                      <Input
+                        // value={field.value}
+                        disabled={isOldPatient}
+                        placeholder="nama pasien"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -219,6 +268,7 @@ const AntrianNew = () => {
                       Pilih Gender<span className="text-red-600">*</span>
                     </FormLabel>
                     <Select
+                      disabled={isOldPatient}
                       onValueChange={field.onChange}
                       //   defaultValue={"Hari Ini"}
                       value={field.value}
@@ -246,7 +296,11 @@ const AntrianNew = () => {
                       Nomor Telepon<span className="text-red-600">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="08" {...field} />
+                      <Input
+                        disabled={isOldPatient}
+                        placeholder="08"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -261,7 +315,7 @@ const AntrianNew = () => {
                       Tanggal Lahir<span className="text-red-600">*</span>
                     </FormLabel>
                     <Popover>
-                      <PopoverTrigger asChild>
+                      <PopoverTrigger disabled={isOldPatient} asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
@@ -281,6 +335,7 @@ const AntrianNew = () => {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
                         <input
+                          disabled={isOldPatient}
                           type="date"
                           className="datepicker-input"
                           value={
@@ -307,7 +362,11 @@ const AntrianNew = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="pasien@something.com" {...field} />
+                      <Input
+                        disabled={isOldPatient}
+                        placeholder="pasien@something.com"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -320,7 +379,11 @@ const AntrianNew = () => {
                   <FormItem>
                     <FormLabel>NIK</FormLabel>
                     <FormControl>
-                      <Input placeholder="NIK pasien" {...field} />
+                      <Input
+                        disabled={isOldPatient}
+                        placeholder="NIK pasien"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -361,26 +424,23 @@ const AntrianNew = () => {
               />
               <FormField
                 control={form.control}
-                name="complaint.doctorId"
+                name="complaint.doctor"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Dokter<span className="text-red-600">*</span>
+                      Pilih Dokter<span className="text-red-600">*</span>
                     </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      //   defaultValue={""}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih Dokter" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Hari Ini">Hari Ini</SelectItem>
-                        <SelectItem value="Besok">Besok</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <ReactSelect
+                        isDisabled={loadingDoctor}
+                        placeholder={
+                          loadingDoctor ? "Mengambil data..." : "Pilih Dokter"
+                        }
+                        onChange={(val) => field.onChange(val)}
+                        options={doctors}
+                        isClearable
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -416,7 +476,9 @@ const AntrianNew = () => {
                 name="complaint.complaintType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tipe Keluhan</FormLabel>
+                    <FormLabel>
+                      Tipe Keluhan<span className="text-red-600">*</span>
+                    </FormLabel>
                     <FormControl>
                       <ReactSelect
                         onChange={(val) => field.onChange(val)}

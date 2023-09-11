@@ -90,15 +90,9 @@ const SidebarClinic = () => {
   const currentPath = pathname?.split("/")[3];
   const basePath = (pathname?.split("/").slice(1, 3).join("/"))
   const {data: session} = useSession()
-
-  console.log(session?.user?.clinicId)
-
   const [value, loading, error] = useDocumentData(
     doc(db, "clinic", session?.user?.clinicId as string)
   )
-
-  console.log(value)
-
   return (
     <nav className="h-screen sticky top-0 left-0 py-6 border-r w-60 flex flex-col">
       <div className="border-b px-6 pb-4">
