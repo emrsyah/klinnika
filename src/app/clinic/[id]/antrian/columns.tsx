@@ -28,6 +28,10 @@ export const columns: ColumnDef<Queue>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => <ColumnHeader column={column} title="Id" />,
+    cell: ({ row }) => {
+      const id: string = row.getValue("id")
+      return <div>{`${id.slice(0, 10)}...`}</div>;
+    },
   },
   {
     accessorKey: "user.name",

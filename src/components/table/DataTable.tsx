@@ -43,7 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Layers, Plus } from "lucide-react";
+import { Layers, Plus, RefreshCcw } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
@@ -63,9 +63,9 @@ export function DataTable<TData, TValue>({
   isLoading,
   isError,
 }: DataTableProps<TData, TValue>) {
-  const params = useSearchParams()!
-  const pathname = usePathname()
-  const router = useRouter()
+  const params = useSearchParams()!;
+  const pathname = usePathname();
+  const router = useRouter();
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -73,8 +73,14 @@ export function DataTable<TData, TValue>({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  
-  const [mode, setMode] = React.useState(params?.get("mode") ? (params.get("mode") === "focus" || params.get("mode") === "all") ? params.get("mode") : "focus" : "focus");
+
+  const [mode, setMode] = React.useState(
+    params?.get("mode")
+      ? params.get("mode") === "focus" || params.get("mode") === "all"
+        ? params.get("mode")
+        : "focus"
+      : "focus"
+  );
 
   const table = useReactTable({
     data,
@@ -94,15 +100,15 @@ export function DataTable<TData, TValue>({
   });
 
   const changeModeHandler = (value: string) => {
-    setMode(value)
-    const searchParams = new URLSearchParams(params)
-    searchParams.set("mode", value)
-    router.push(pathname as string + "?" + searchParams.toString())
-  }
+    setMode(value);
+    const searchParams = new URLSearchParams(params);
+    searchParams.set("mode", value);
+    router.push((pathname as string) + "?" + searchParams.toString());
+  };
 
   return (
     <>
-      <div className="flex justify-between items-center py-4">
+      <div className="flex justify-between items-center mt-4">
         <div className="flex-grow w-full flit gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -131,6 +137,18 @@ export function DataTable<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button
+            onClick={() => {
+              table.resetColumnVisibility();
+              table.resetSorting();
+            }}
+            variant={"outline"}
+            className="flit gap-2"
+            size={"sm"}
+          >
+            <RefreshCcw size={16} />
+            Reset Default
+          </Button>
           <Select value={mode as string} onValueChange={changeModeHandler}>
             <SelectTrigger className="w-fit gap-2 font-semibold text-blue-900">
               <SelectValue className="whitespace-nowrap" placeholder="Mode" />
@@ -154,13 +172,17 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <Button onClick={() => router.push(pathname + "/new")} size={"sm"} className="w-fit gap-2 whitespace-nowrap">
+          <Button
+            onClick={() => router.push(pathname + "/new")}
+            size={"sm"}
+            className="w-fit gap-2 whitespace-nowrap"
+          >
             <Plus size={20} />
             Tambahkan Baru
           </Button>
         </div>
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border mt-4">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -203,7 +225,9 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  onClick={() => router.push(pathname! + "/" + row.getValue("id"))}
+                  onClick={() =>
+                    router.push(pathname! + "/" + row.getValue("id"))
+                  }
                   data-state={row.getIsSelected() && "selected"}
                   className="font-medium hover:bg-blue-50 cursor-pointer hover:text-blue-900"
                 >
