@@ -62,11 +62,13 @@ export function useQueueData(params: string) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const observables = snapshot.docs.map((doc) => {
         const data = doc.data();
+        const dataId = doc.id
         const patientId = data.patient_id;
         return getUserData(patientId).pipe(
           map((user) => ({
             user,
             ...data,
+            id: dataId
           })),
           catchError((error) => {
             console.log("error happened - user data");
@@ -87,12 +89,12 @@ export function useQueueData(params: string) {
           })
         )
         .subscribe((results) => {
+          // console.log(results)
           setLoading(false);
           setCombinedData(results);
         });
     });
     return () => unsubscribe();
   }, [params]);
-  console.log(combinedData);
   return { combinedData, loading, error };
 }

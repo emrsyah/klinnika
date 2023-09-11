@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { siteConfig } from "@/constant/config";
 import SessionProvider from "@/components/auth/SessionProvider";
+import Toast from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: {
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <SessionProvider>
+        <Toast />
           {children}
         </SessionProvider>
       </body>

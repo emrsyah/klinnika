@@ -1,6 +1,7 @@
 "use client";
 import { Separator } from "@/components/ui/separator";
 import * as React from "react";
+import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -47,61 +48,8 @@ import {
   where,
 } from "firebase/firestore";
 import { useSession } from "next-auth/react";
-
-const isEmail = (value: string) => {
-  // You can use a regular expression or any other method to validate the email format
-  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-  return emailRegex.test(value);
-};
-
-const formSchema = z.object({
-  patient: z.object({
-    name: z.string().min(5, { message: "nama minimal 5 huruf" }),
-    email: z
-      .string()
-      .transform((value) => (value === "" ? undefined : value.trim())) // Trim whitespace and treat empty string as undefined
-      .refine((value) => value === undefined || isEmail(value), {
-        message: "masukkan email yang valid",
-      })
-      .optional(),
-    nik: z
-      .string()
-      .transform((value) => (value === "" ? undefined : value.trim())) // Trim whitespace and treat empty string as undefined
-      .refine((value) => value === undefined || value.length === 16, {
-        message: "masukkan nik yang valid",
-      })
-      .optional(),
-    gender: z.enum(["Laki-laki", "Perempuan"], {
-      required_error: "gender wajib diisi",
-    }),
-    phone: z
-      .string({ required_error: "nomor telepon wajib dimasukkan" })
-      .trim(),
-    birthDate: z.date({ required_error: "tanggal lahir wajib dimasukkan" }),
-  }),
-  complaint: z.object({
-    description: z.string().optional(),
-    appointmentDate: z.string({ required_error: "wajib memilih tanggal" }),
-    doctor: z.object(
-      {
-        label: z.string(),
-        value: z.string(),
-      },
-      { required_error: "wajib memilih dokter" }
-    ),
-    complaintType: z
-      .array(
-        z.object({
-          label: z.string(),
-          value: z.string(),
-        })
-      )
-      .min(1, { message: "minimal memilih 1 tipe komplain" }),
-    queueType: z.enum(["BPJS", "Regular"], {
-      required_error: "wajib memilih 1 tipe antrian",
-    }),
-  }),
-});
+import { queueFormSchema } from "@/lib/validation/form";
+import toast from "react-hot-toast";
 
 const keluhanType = [
   { value: "Demam", label: "Demam" },
@@ -159,8 +107,8 @@ const AntrianNew = () => {
     useCollectionData(patientRef);
   const [doctors, loadingDoctor, errorDoctor] = useCollectionData(doctorRef);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof queueFormSchema>>({
+    resolver: zodResolver(queueFormSchema),
     defaultValues: {
       patient: {
         nik: "",
@@ -170,10 +118,45 @@ const AntrianNew = () => {
   });
 
   // 2. Define a submit handler.
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof queueFormSchema>) => {
+    let patientId = isOldPatient ? values.patient.id : "";
+    const toastId = toast.loading("Sedang Menambahkan Data...");
+    try {
+      if (!isOldPatient) {
+        // console.log(typeof values.patient.birthDate)
+        // console.log(typeof new Date() === typeof values.patient.birthDate)
+        const formattedPatient = {
+          patient: {
+            ...values.patient,
+          },
+          clinicId: data?.user?.clinicId,
+        };
+        const newPatientId = await axios.post("/api/pasien", {
+          ...formattedPatient,
+        });
+        patientId = newPatientId.data
+      }
+      const formattedQueue = {
+        complaint: {
+          ...values.complaint,
+        },
+        userId: patientId,
+        clinicId: data?.user?.clinicId
+      };
+      
+      const newQueue = await axios.post("/api/antrian", {
+        ...formattedQueue
+      });
+      toast.success("Berhasil Menambahkan Data", {
+        id: toastId,
+      });
+      console.log(newQueue.data)
+    } catch (err) {
+      toast.error("Gagal Menambahkan Data", {
+        id: toastId,
+      });
+      console.error(err);
+    }
   };
 
   const resetPatient = () => {
@@ -186,6 +169,7 @@ const AntrianNew = () => {
         nik: "",
         email: "",
         birthDate: new Date(),
+        id: "-999",
       },
       { shouldDirty: false }
     );
@@ -209,6 +193,7 @@ const AntrianNew = () => {
         nik: val.nik ?? "",
         email: val.email ?? "",
         birthDate: val.birth_date.toDate() ?? new Date(),
+        id: val.value ?? "",
       },
       { shouldValidate: true }
     );
