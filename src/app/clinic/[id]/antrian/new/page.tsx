@@ -34,6 +34,19 @@ import {
 } from "@/components/ui/select";
 import ReactSelect from "react-select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCollectionData } from "react-firebase-hooks/firestore";
+import { db } from "@/lib/firebase";
+import {
+  QueryDocumentSnapshot,
+  SnapshotOptions,
+  WithFieldValue,
+  DocumentData,
+  FirestoreDataConverter,
+  collection,
+  query,
+  where,
+} from "firebase/firestore";
+import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
   patient: z.object({
@@ -46,6 +59,9 @@ const formSchema = z.object({
       .string()
       .length(16, { message: "masukkan nik yang valid" })
       .optional(),
+    gender: z.enum(["Laki-laki", "Perempuan"], {
+      required_error: "gender wajib diisi",
+    }),
     phone: z.string({ required_error: "nomor telepon wajib dimasukkan" }),
     birthDate: z.date({ required_error: "tanggal lahir wajib dimasukkan" }),
   }),
@@ -68,12 +84,50 @@ const formSchema = z.object({
 });
 
 const keluhanType = [
-  { value: "chocolate", label: "Chocolate" },
-  { value: "strawberry", label: "Strawberry" },
-  { value: "vanilla", label: "Vanilla" },
+  { value: "Demam", label: "Demam" },
+  { value: "Flu", label: "Flu" },
+  { value: "Batuk", label: "Batuk" },
+  { value: "Sakit Kepala", label: "Sakit Kepala" },
+  { value: "Sakit Tenggorokan", label: "Sakit Tenggorokan" },
+  { value: "Mual", label: "Mual" },
+  { value: "Diare", label: "Diare" },
+  { value: "Sesak Napas", label: "Sesak Napas" },
+  { value: "Sakit Gigi", label: "Sakit Gigi" },
 ];
 
+interface Selectable<T> {
+  label: string;
+  value: T;
+}
+
+const patientSelectableConverter: FirestoreDataConverter<Selectable<string>> = {
+  toFirestore(
+    patientSelectable: WithFieldValue<Selectable<string>>
+  ): DocumentData {
+    return { label: patientSelectable.label, value: patientSelectable.value };
+  },
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options: SnapshotOptions
+  ): Selectable<string> {
+    const data = snapshot.data(options);
+    return {
+      label: data.name,
+      value: snapshot.id,
+    };
+  },
+};
+
 const AntrianNew = () => {
+  const { data } = useSession();
+  
+  const patientRef = query(
+    collection(db, "patient"),
+    where("clinic_id", "==", data?.user?.clinicId)
+  ).withConverter(patientSelectableConverter);
+
+  const [patients, loading, error] = useCollectionData(patientRef);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     // defaultValues: {
@@ -82,11 +136,14 @@ const AntrianNew = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
-  }
+  };
+
+  const changePatientHandler = () => {};
+
   return (
     <>
       <h1 className="font-bold text-xl mrt text-blue-400">
@@ -98,20 +155,55 @@ const AntrianNew = () => {
           className="border rounded-sm p-4 flex flex-col w-full gap-2 mt-2"
         >
           <div className="flex flex-col gap-2">
-            <h2 className="formSubTitle">Data Pasien</h2>
+            <div className="flit justify-between">
+              <h2 className="formSubTitle">Data Pasien</h2>
+              <ReactSelect
+                isDisabled={loading}
+                placeholder={loading ? "Mengambil data..." : "Pilih Pasien"}
+                onChange={changePatientHandler}
+                options={patients}
+                isClearable
+              />
+            </div>
             <Separator />
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <FormField
                 control={form.control}
                 name="patient.name"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
+                  <FormItem>
                     <FormLabel>
                       Nama<span className="text-red-600">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="nama pasien" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="patient.gender"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Pilih Gender<span className="text-red-600">*</span>
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      //   defaultValue={"Hari Ini"}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih Gender" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Laki-laki">Laki-laki</SelectItem>
+                        <SelectItem value="Perempuan">Perempuan</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -159,13 +251,6 @@ const AntrianNew = () => {
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        {/* <Calendar
-                          captionLayout="dropdown"
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        /> */}
                         <input
                           type="date"
                           className="datepicker-input"
