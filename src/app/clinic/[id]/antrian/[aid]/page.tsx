@@ -1,8 +1,8 @@
 "use client";
+import * as React from "react"
 import { Button } from "@/components/ui/button";
 import { QueueOptionType, colourStyles } from "@/config/styles";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
 import ReactSelect from "react-select";
 import { useQueueDataById } from "./useQueueDataById";
 import { Separator } from "@radix-ui/react-dropdown-menu";
@@ -10,6 +10,7 @@ import InputWithLabel from "@/components/InputWithLabel";
 import { dateConverterAppointment, dateConverterCreatedAt } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 
 export const queueOptions: QueueOptionType[] = [
   {
@@ -38,10 +39,18 @@ const AntrianDetail = () => {
   const pathname = usePathname();
   const queueId = pathname?.split("/")[pathname!.split("/").length - 1];
   const { queue, loading, error, selectedType } = useQueueDataById(queueId!);
-  console.log(queue);
+  const [openDialog, setOpenDialog] = React.useState<boolean>(false)
+  const [nextSelected, setNextSelected] = React.useState(queueOptions[0].value)
+
+  const typeChangeHandler = (val: any) => {
+    if(val.value === selectedType.value) return
+    setNextSelected(val.value)
+    setOpenDialog(true)
+  }
 
   return (
     <div className="flex flex-col gap-4">
+      <DeleteConfirmationDialog current={selectedType.value} next={nextSelected}  open={openDialog} setOpen={setOpenDialog} />
       <div className="flit justify-between">
         <h1 className="font-bold text-xl mrt text-blue-400">ID-{queueId}</h1>
         <div className="flit gap-2">
@@ -50,6 +59,7 @@ const AntrianDetail = () => {
             isClearable={false}
             isSearchable={false}
             value={selectedType}
+            onChange={typeChangeHandler}
             defaultValue={selectedType}
             styles={colourStyles}
             options={queueOptions}

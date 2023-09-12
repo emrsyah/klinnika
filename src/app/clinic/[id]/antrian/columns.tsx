@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { ColumnHeader } from "@/components/table/ColumnHeader";
-import { dateConverter, dateConverterAppointment } from "@/lib/utils";
+import { dateConverter, dateConverterAppointment, queueTypeToColorConverter } from "@/lib/utils";
 import QueueTypeBadge from "@/components/QueueTypeBadge";
 
 
@@ -59,16 +59,7 @@ export const columns: ColumnDef<Queue>[] = [
     header: "Status",
     cell: ({ row }) => {
       const type: string = row.getValue("type");
-      const variants =
-        type === "Menunggu"
-          ? "yellow"
-          : type === "Bayar"
-          ? "green"
-          : type === "Batal"
-          ? "red"
-          : type === "Dalam Proses"
-          ? "purple"
-          : "blue";
+      const variants = queueTypeToColorConverter(type)
       return <QueueTypeBadge type={variants}>{type}</QueueTypeBadge>;
     },
   },
