@@ -1,6 +1,13 @@
 import { db } from "@/lib/firebase";
 import { queueOnlySchema } from "@/lib/validation/form";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getCountFromServer,
+  query,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
 
 // {
@@ -43,6 +50,11 @@ export async function POST(request: NextRequest) {
   today.setHours(0, 0, 0, 0);
   let tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
+  let todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+  let tomorrowEnd = new Date();
+  tomorrowEnd.setDate(tomorrowEnd.getDate() + 1);
+  tomorrowEnd.setHours(23, 59, 59, 999);
 
   try {
     const json = await request.json();
@@ -52,6 +64,28 @@ export async function POST(request: NextRequest) {
     );
     const appointmentDate =
       json.complaint.appointmentDate === "Hari Ini" ? today : tomorrow;
+
+    let q = query(
+      collection(db, "queue"),
+      where("clinic_id", "==", json.clinicId)
+    );
+
+    if (appointmentDate === today) {
+      q = query(
+        q,
+        where("appointment_date", ">=", today),
+        where("appointment_date", "<=", todayEnd)
+      );
+    } else {
+      q = query(
+        q,
+        where("appointment_date", ">=", tomorrow),
+        where("appointment_date", "<=", tomorrowEnd)
+      );
+    }
+
+    const currentQueueLengthSnap = await getCountFromServer(q)
+    const currentQueueLength = currentQueueLengthSnap.data().count
 
     const readyToAddQueueFormat = {
       doctor_id: json.complaint.doctor.value,
@@ -65,6 +99,7 @@ export async function POST(request: NextRequest) {
       appointment_date: appointmentDate,
       patient_id: json.userId,
       created_at: serverTimestamp(),
+      order_number: currentQueueLength + 1
     };
     const newQueue = await addDoc(collection(db, "queue"), {
       ...readyToAddQueueFormat,
