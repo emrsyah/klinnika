@@ -225,8 +225,10 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
+
                   onClick={() =>
                     router.push(pathname! + "/" + row.getValue("id"))
+                    // console.log(row.get)
                   }
                   data-state={row.getIsSelected() && "selected"}
                   className="font-medium hover:bg-blue-50 cursor-pointer hover:text-blue-900"

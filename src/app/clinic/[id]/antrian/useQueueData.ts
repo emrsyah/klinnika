@@ -40,7 +40,7 @@ function getDoctorData(doctor_id: string) {
   );
 }
 
-export function useQueueData(params: string) {
+export function useQueueData({params, clinicId} : {params: string, clinicId: string}) {
   const [combinedData, setCombinedData] = React.useState<any[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
@@ -58,7 +58,8 @@ export function useQueueData(params: string) {
     let q = query(
       collection(db, "queue"),
       orderBy("appointment_date", "desc"),
-      orderBy("created_at", "asc")
+      orderBy("created_at", "asc"),
+      where("clinic_id", "==", clinicId)
     );
     if (params === "focus") {
       q = query(

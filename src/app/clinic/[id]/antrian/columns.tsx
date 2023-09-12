@@ -36,14 +36,14 @@ export const columns: ColumnDef<Queue>[] = [
       );
     },
   },
-  // {
-  //   accessorKey: "id",
-  //   header: ({ column }) => <ColumnHeader column={column} title="Id" />,
-  //   cell: ({ row }) => {
-  //     const id: string = row.getValue("id");
-  //     return <div>{`${id.slice(0, 10)}...`}</div>;
-  //   },
-  // },
+  {
+    accessorKey: "id",
+    header: ({ column }) => <ColumnHeader column={column} title="Id" className="hidden" />,
+    cell: ({ row }) => {
+      const id: string = row.getValue("id");
+      return <div className="hidden">{id}</div>;
+    },
+  },
   {
     accessorKey: "patient.name",
     header: ({ column }) => (
