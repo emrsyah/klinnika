@@ -5,12 +5,13 @@ import { QueueOptionType, colourStyles } from "@/config/styles";
 import { usePathname } from "next/navigation";
 import ReactSelect from "react-select";
 import { useQueueDataById } from "./useQueueDataById";
-import { Separator } from "@radix-ui/react-dropdown-menu";
 import InputWithLabel from "@/components/InputWithLabel";
 import { dateConverterAppointment, dateConverterCreatedAt } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { ChangeProgressConfirmationDialog } from "@/components/ChangeProgressConfirmationDialog";
+import { FinishFormSheet } from "@/components/FinishFormSheet";
+import { Separator } from "@/components/ui/separator";
 
 export const queueOptions: QueueOptionType[] = [
   {
@@ -40,25 +41,37 @@ const AntrianDetail = () => {
   const queueId = pathname?.split("/")[pathname!.split("/").length - 1];
   const { queue, loading, error, selectedType } = useQueueDataById(queueId!);
   const [openDialog, setOpenDialog] = React.useState<boolean>(false)
+  const [openSheet, setOpenSheet] = React.useState<boolean>(false)
   const [nextSelected, setNextSelected] = React.useState(queueOptions[0].value)
 
   const typeChangeHandler = (val: any) => {
     if(val.value === selectedType.value) return
+    if(val.value === "Selesai Proses") {
+      setOpenSheet(true)
+      return
+    }
     setNextSelected(val.value)
     setOpenDialog(true)
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <DeleteConfirmationDialog current={selectedType.value} next={nextSelected}  open={openDialog} setOpen={setOpenDialog} />
+      {selectedType.value === "Selesai Proses" ? (
+        <div className="p-3 font-medium rounded border-2 border-blue-800 bg-blue-100 text-blue-900">
+          Untuk Melanjutkan Proses {` "Selesai Proses" `}, Ada di Menu Pembayaran
+        </div>
+      ) : null}
+      <ChangeProgressConfirmationDialog current={selectedType.value} next={nextSelected}  open={openDialog} setOpen={setOpenDialog} />
+      <FinishFormSheet open={openSheet} setOpen={setOpenSheet} />
       <div className="flit justify-between">
         <h1 className="font-bold text-xl mrt text-blue-400">ID-{queueId}</h1>
         <div className="flit gap-2">
           <ReactSelect
-            isDisabled={loading}
+            isDisabled={loading || selectedType.value === "Selesai Proses"}
             isClearable={false}
             isSearchable={false}
             value={selectedType}
+            isOptionDisabled={(option) => option.value === "Bayar"}
             onChange={typeChangeHandler}
             defaultValue={selectedType}
             styles={colourStyles}
@@ -67,7 +80,7 @@ const AntrianDetail = () => {
           />
           <Button
             variant={"destructive"}
-            disabled={loading}
+            disabled={loading || selectedType.value === "Selesai Proses"}
             type="button"
             size={"sm"}
           >
