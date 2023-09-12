@@ -1,10 +1,10 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import dayjs from "dayjs";
 import { ColumnHeader } from "@/components/table/ColumnHeader";
 import { dateConverter, dateConverterAppointment } from "@/lib/utils";
 import QueueTypeBadge from "@/components/QueueTypeBadge";
+
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -26,25 +26,32 @@ export type Queue = {
 
 export const columns: ColumnDef<Queue>[] = [
   {
-    accessorKey: "id",
-    header: ({ column }) => <ColumnHeader column={column} title="Id" />,
+    accessorKey: "order_number",
+    header: ({ column }) => <ColumnHeader column={column} title="Nomor" />,
     cell: ({ row }) => {
-      const id: string = row.getValue("id")
-      return <div>{`${id.slice(0, 10)}...`}</div>;
+      return (
+        <div className="flit h-8 w-8 justify-center text-blue-800 rounded-full bg-blue-100">
+          {row.getValue("order_number")}
+        </div>
+      );
     },
   },
-  {
-    accessorKey: "user.name",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Nama Pasien" />
-    ),
-  },
   // {
-  //   accessorKey: "user.nik",
-  //   header: "NIK",
+  //   accessorKey: "id",
+  //   header: ({ column }) => <ColumnHeader column={column} title="Id" />,
+  //   cell: ({ row }) => {
+  //     const id: string = row.getValue("id");
+  //     return <div>{`${id.slice(0, 10)}...`}</div>;
+  //   },
   // },
   {
-    accessorKey: "user.phone",
+    accessorKey: "patient.name",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Nama" />
+    ),
+  },
+  {
+    accessorKey: "patient.phone",
     header: "Kontak",
   },
   {
@@ -52,8 +59,29 @@ export const columns: ColumnDef<Queue>[] = [
     header: "Status",
     cell: ({ row }) => {
       const type: string = row.getValue("type");
-      const variants = type === "Menunggu" ? "yellow" : type === "Bayar" ? "green" : type === "Batal" ? "red" : type === "Dalam Proses" ? "purple" : "blue"
-      return <QueueTypeBadge type={variants} >{type}</QueueTypeBadge>;
+      const variants =
+        type === "Menunggu"
+          ? "yellow"
+          : type === "Bayar"
+          ? "green"
+          : type === "Batal"
+          ? "red"
+          : type === "Dalam Proses"
+          ? "purple"
+          : "blue";
+      return <QueueTypeBadge type={variants}>{type}</QueueTypeBadge>;
+    },
+  },
+  {
+    accessorKey: "doctor.name",
+    header: "Dokter",
+    cell: ({ row }) => {
+      const docName: string = row.getValue("doctor_name")
+      return (
+        <span className="line-clamp-1">
+          {`Dr. ${docName}`}
+        </span>
+      );
     },
   },
   {

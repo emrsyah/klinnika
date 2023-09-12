@@ -16,7 +16,7 @@ const ClinicApp = () => {
         isLoading={loading}
         isError={error ? error : ""}
         filterLabel="nama pasien"
-        filterValue="user_name"
+        filterValue="patient_name"
         columns={columns}
         data={combinedData}
       />

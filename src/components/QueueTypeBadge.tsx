@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { VariantProps, cva } from "class-variance-authority";
 import * as React from "react";
 
-const variants = cva("px-3 py-1 w-fit text-sm font-semibold flex items-center justify-center rounded-xl", {
+const variants = cva("px-[10px] py-[2px]  w-fit text-[13px] font-semibold flex items-center justify-center rounded-full", {
   variants: {
     type: {
       yellow: "bg-yellow-100 text-yellow-600",
