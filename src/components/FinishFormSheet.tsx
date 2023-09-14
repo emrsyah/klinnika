@@ -30,6 +30,8 @@ import { Separator } from "@/components/ui/separator";
 import { RefCallback } from "react";
 import { Label } from "./ui/label";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import dayjs from "dayjs";
+import { Input } from "./ui/input";
 
 const mediActOptions = [
   { value: "Pemberian Obat", label: "Pemberian Obat" },
@@ -90,7 +92,7 @@ const CustomOption = ({
       <h1 className="font-bold text-blue-900">{data.label}</h1>
       <h2 className="text-gray-400 text-sm font-medium">{data.value}</h2>
       <div className="flex items-center gap-2 text-gray-700 text-sm font-medium">
-        <h2>Exp: 10 Sept 2023</h2>|<h2>{"Stock: 5"}</h2>
+        <h2>Exp: {dayjs(data.expired_at.toDate()).format('DD MMM YYYY')}</h2>|<h2>{data.amount}</h2>
       </div>
     </div>
   ) : null;
@@ -102,27 +104,26 @@ const formSchema = z.object({
     label: z.string(),
     value: z.string(),
   }),
-  medicines: z.array(
-    z.object({
-      label: z.string(),
-      value: z.string(),
-    })
-  ),
 });
 
 export function FinishFormSheet({
   open,
   setOpen,
+  data,
+  loading,
 }: //   current,
 //   next,
 {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  data: any;
+  loading: boolean,
   //   current: string;
   //   next: string;
 }) {
-  const [medicines, setMedicines] = React.useState(obatOptions);
+  const [medicines, setMedicines] = React.useState<any[]>(data);
   const [selectedMedicines, setSelectedMedicines] = React.useState<any[]>([]);
+  const [editVal, setEditVal] = React.useState<number[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -132,35 +133,63 @@ export function FinishFormSheet({
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
+    console.log(selectedMedicines)
     console.log(values);
   }
 
   const toggleIsSelected = (index: number) => {
-    const updatedMedicines = [...obatOptions];
-    updatedMedicines[index].isSelected = !updatedMedicines[index].isSelected;
+    const updatedMedicines = [...data];
+    updatedMedicines[index].isSelected = !updatedMedicines[index]?.isSelected;
     setMedicines(updatedMedicines);
   };
 
   const changeObatHandler = (val: any) => {
     if (val === null) return;
-    const valIdx = medicines.findIndex((med) => med.value === val.value);
-    setSelectedMedicines((current) => [...current, val]);
+    const valIdx = data.findIndex((med: any) => med.value === val.value);
+    setSelectedMedicines((current) => [...current, { ...val, quantity: 1 }]);
     toggleIsSelected(valIdx);
   };
 
   const clickTrashHandler = (val: any) => {
     if (val === null) return;
-    const valIdx = medicines.findIndex((med) => med.value === val.value);
-    setSelectedMedicines((current) => current.filter(med => med.value !== val.value));
+    const valIdx = data.findIndex((med: any) => med.value === val.value);
+    setSelectedMedicines((current) =>
+      current.filter((med) => med.value !== val.value)
+    );
     toggleIsSelected(valIdx);
+  };
+
+  const minusQuantityHandler = (val: any) => {
+    if (val.quantity === 1) return;
+    const updated = [...selectedMedicines];
+    updated.map((up) => {
+      val.value === up.value ? (up.quantity -= 1) : up;
+    });
+    setSelectedMedicines(updated);
+  };
+
+  const plusQuantityHandler = (val: any) => {
+    if (val.quantity === val.amount) return;
+    const updated = [...selectedMedicines];
+    updated.map((up) => {
+      val.value === up.value ? (up.quantity += 1) : up;
+    });
+    setSelectedMedicines(updated);
+  };
+
+  const onMedicineDescChange = (val: string, idx: number) => {
+    const updated = [...selectedMedicines]
+    updated[idx] = {...updated[idx], medDesc: val}
+    setSelectedMedicines(updated)
+    // console.log(updated)
   }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild></SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-auto">
         <Form {...form}>
-          <form>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <SheetHeader>
               <SheetTitle>Isi Hasil Pemeriksaan</SheetTitle>
               <SheetDescription>
@@ -175,11 +204,13 @@ export function FinishFormSheet({
                 name="medical_act"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tindakan</FormLabel>
+                    <FormLabel>
+                      Tindakan<span className="text-red-600">*</span>
+                    </FormLabel>
                     <FormControl>
                       <ReactSelect
+                        {...field}
                         options={mediActOptions}
-                        defaultValue={mediActOptions[0]}
                         isMulti={false}
                         isClearable={false}
                         isSearchable={true}
@@ -193,10 +224,11 @@ export function FinishFormSheet({
               <div className="flex flex-col gap-3">
                 <Label>Obat Diberikan</Label>
                 <ReactSelect
-                  options={medicines}
+                  options={data}
                   isMulti={false}
                   isClearable={false}
-                  placeholder={"Tambahkan Obat"}
+                  isDisabled={loading}
+                  placeholder={loading ? "Mengambil Data..." : "Tambahkan Obat"}
                   components={{
                     Option: CustomOption,
                   }}
@@ -207,26 +239,51 @@ export function FinishFormSheet({
                   isSearchable={true}
                   // onChange={(val) => field.onChange(val)}
                 />
-                {selectedMedicines.map((med) => (
+                {selectedMedicines.map((med, idx) => (
                   <div
                     key={med.value}
                     className="p-2 border rounded flex flex-col gap-2"
                   >
+                    <div className="flex flex-col gap-1">
                     <div className="flit justify-between">
                       <h3 className="text-gray-800 font-medium">{med.label}</h3>
-                      <p className="text-sm text-gray-600">Sisa: 20</p>
+                      <p className="text-sm text-gray-600">Sisa: {med.amount}</p>
                     </div>
-                    <p className="text-blue-400 text-sm">Tulis Catatan</p>
+                    <p className="text-xs text-gray-600 font-medium">{med.id}</p>
+                    </div>
+                    {editVal.find(val => val === med.value) ? (
+                      <Input onChange={(ev) => onMedicineDescChange(ev.target.value, idx)} />
+                    ) : (
+                    <button type="button" onClick={() => {
+                      setEditVal(curr => [...curr, med.value])
+                    }} className="text-blue-400 text-start text-sm">Tulis Catatan</button>
+                    )}
                     <div className="flit justify-between mt-1">
                       <Trash2
-                        onClick={() =>clickTrashHandler(med)}
+                        onClick={() => clickTrashHandler(med)}
                         size={24}
                         className="text-gray-500 cursor-pointer p-1 rounded hover:bg-red-100 hover:text-red-700"
                       />
                       <div className="flit gap-3 text-sm">
-                        <Minus size={16} className={`hover:text-blue-600 cursor-pointer hover:bg-blue-50`} />
-                        <div>1</div>
-                        <Plus size={16} className={`hover:text-blue-600 cursor-pointer hover:bg-blue-50`} />
+                        <Minus
+                          onClick={() => minusQuantityHandler(med)}
+                          size={16}
+                          className={`hover:text-blue-600 cursor-pointer ${
+                            med.quantity === 1
+                              ? "!text-gray-500 !cursor-not-allowed"
+                              : null
+                          } hover:bg-blue-50`}
+                        />
+                        <div>{med.quantity}</div>
+                        <Plus
+                          onClick={() => plusQuantityHandler(med)}
+                          size={16}
+                          className={`hover:text-blue-600 cursor-pointer ${
+                            med.quantity === med.amount
+                              ? "!text-gray-500 !cursor-not-allowed"
+                              : null
+                          } hover:bg-blue-50`}
+                        />
                       </div>
                     </div>
                   </div>
@@ -257,9 +314,7 @@ export function FinishFormSheet({
             </div>
             <Separator className="my-4" />
             <SheetFooter>
-              <SheetClose asChild>
-                <Button type="submit">Konfirmasi</Button>
-              </SheetClose>
+              <Button type="submit">Konfirmasi & Lanjutkan</Button>
             </SheetFooter>
           </form>
         </Form>

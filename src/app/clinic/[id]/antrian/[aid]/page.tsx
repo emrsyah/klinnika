@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react"
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { QueueOptionType, colourStyles } from "@/config/styles";
 import { usePathname } from "next/navigation";
@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ChangeProgressConfirmationDialog } from "@/components/ChangeProgressConfirmationDialog";
 import { FinishFormSheet } from "@/components/FinishFormSheet";
 import { Separator } from "@/components/ui/separator";
+import { useMedicinesData } from "./useMedicinesData";
+import { useSession } from "next-auth/react";
 
 export const queueOptions: QueueOptionType[] = [
   {
@@ -37,32 +39,51 @@ export const queueOptions: QueueOptionType[] = [
 ];
 
 const AntrianDetail = () => {
+  const { data } = useSession();
   const pathname = usePathname();
   const queueId = pathname?.split("/")[pathname!.split("/").length - 1];
   const { queue, loading, error, selectedType } = useQueueDataById(queueId!);
-  const [openDialog, setOpenDialog] = React.useState<boolean>(false)
-  const [openSheet, setOpenSheet] = React.useState<boolean>(false)
-  const [nextSelected, setNextSelected] = React.useState(queueOptions[0].value)
+  const {
+    medicines,
+    error: erroMed,
+    loading: loadingMed,
+  } = useMedicinesData(data!.user!.clinicId);
+  const [openDialog, setOpenDialog] = React.useState<boolean>(false);
+  const [openSheet, setOpenSheet] = React.useState<boolean>(false);
+  const [nextSelected, setNextSelected] = React.useState(queueOptions[0].value);
 
   const typeChangeHandler = (val: any) => {
-    if(val.value === selectedType.value) return
-    if(val.value === "Selesai Proses") {
-      setOpenSheet(true)
-      return
+    if (val.value === selectedType.value) return;
+    if (val.value === "Selesai Proses") {
+      setOpenSheet(true);
+      return;
     }
-    setNextSelected(val.value)
-    setOpenDialog(true)
-  }
+    setNextSelected(val.value);
+    setOpenDialog(true);
+  };
 
   return (
     <div className="flex flex-col gap-4">
       {selectedType.value === "Selesai Proses" ? (
         <div className="p-3 font-medium rounded border-2 border-blue-800 bg-blue-100 text-blue-900">
-          Untuk Melanjutkan Proses {` "Selesai Proses" `}, Ada di Menu Pembayaran
+          Untuk Melanjutkan Proses {` "Selesai Proses" `}, Ada di Menu
+          Pembayaran
         </div>
       ) : null}
-      <ChangeProgressConfirmationDialog current={selectedType.value} next={nextSelected}  open={openDialog} setOpen={setOpenDialog} />
-      <FinishFormSheet open={openSheet} setOpen={setOpenSheet} />
+      <ChangeProgressConfirmationDialog
+        current={selectedType.value}
+        next={nextSelected}
+        open={openDialog}
+        setOpen={setOpenDialog}
+      />
+      {/* {loadingMed ? ( */}
+      <FinishFormSheet
+        data={medicines}
+        loading={loadingMed}
+        open={openSheet}
+        setOpen={setOpenSheet}
+      />
+      {/* ) : null} */}
       <div className="flit justify-between">
         <h1 className="font-bold text-xl mrt text-blue-400">ID-{queueId}</h1>
         <div className="flit gap-2">
