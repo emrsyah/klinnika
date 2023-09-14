@@ -55,6 +55,8 @@ export const useQueueDataById = (queueId: string) => {
             },
           };
 
+          console.log(formattedQueue)
+
           setQueue(formattedQueue);
 
           setLoading(false);

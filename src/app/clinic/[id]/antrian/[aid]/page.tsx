@@ -45,7 +45,7 @@ const AntrianDetail = () => {
   const { queue, loading, error, selectedType } = useQueueDataById(queueId!);
   const {
     medicines,
-    error: erroMed,
+    error: errorMed,
     loading: loadingMed,
   } = useMedicinesData(data!.user!.clinicId);
   const [openDialog, setOpenDialog] = React.useState<boolean>(false);
@@ -78,6 +78,10 @@ const AntrianDetail = () => {
       />
       {/* {loadingMed ? ( */}
       <FinishFormSheet
+        doc_id={queue?.doctor_id}
+        patient_id={queue?.patient_id}
+        queue_id={queueId!}
+        clinic_id={data!.user!.clinicId}
         data={medicines}
         loading={loadingMed}
         open={openSheet}

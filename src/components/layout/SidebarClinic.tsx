@@ -94,7 +94,7 @@ const SidebarClinic = () => {
     doc(db, "clinic", session?.user?.clinicId as string)
   )
   return (
-    <nav className="h-screen sticky top-0 left-0 py-6 border-r w-60 flex flex-col">
+    <nav className="h-screen bg-white sticky top-0 left-0 py-6 border-r w-60 flex flex-col">
       <div className="border-b px-6 pb-4">
         <ClinicIcon name={value?.name ? value.name : "Loading..."} />
       </div>

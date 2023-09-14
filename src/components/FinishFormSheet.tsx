@@ -32,6 +32,8 @@ import { Label } from "./ui/label";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 import { Input } from "./ui/input";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const mediActOptions = [
   { value: "Pemberian Obat", label: "Pemberian Obat" },
@@ -92,7 +94,8 @@ const CustomOption = ({
       <h1 className="font-bold text-blue-900">{data.label}</h1>
       <h2 className="text-gray-400 text-sm font-medium">{data.value}</h2>
       <div className="flex items-center gap-2 text-gray-700 text-sm font-medium">
-        <h2>Exp: {dayjs(data.expired_at.toDate()).format('DD MMM YYYY')}</h2>|<h2>{data.amount}</h2>
+        <h2>Exp: {dayjs(data.expired_at.toDate()).format("DD MMM YYYY")}</h2>|
+        <h2>{data.amount}</h2>
       </div>
     </div>
   ) : null;
@@ -111,30 +114,77 @@ export function FinishFormSheet({
   setOpen,
   data,
   loading,
+  queue_id,
+  doc_id,
+  patient_id,
+  clinic_id,
 }: //   current,
 //   next,
 {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   data: any;
-  loading: boolean,
+  loading: boolean;
+  queue_id: string;
+  doc_id: string;
+  patient_id: string;
+  clinic_id: string;
   //   current: string;
   //   next: string;
 }) {
   const [medicines, setMedicines] = React.useState<any[]>(data);
   const [selectedMedicines, setSelectedMedicines] = React.useState<any[]>([]);
-  const [editVal, setEditVal] = React.useState<number[]>([])
+  const [editVal, setEditVal] = React.useState<number[]>([]);
+  const [loadingMutate, setLoadingMutate] = React.useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {},
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(selectedMedicines)
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const toastId = toast.loading("Sedang Menambahkan Data...");
+    setLoadingMutate(true)
+    try {
+      const formattedMedicals = selectedMedicines.map((med) => {
+        return {
+          name: med.label,
+          id: med.value,
+          quantity: med.quantity,
+          desc: med.medDesc,
+          inventory_id: med.inventory_id,
+          expired_at: med.expired_at,
+        };
+      });
+      const {data} = await axios.post("/api/medical", {
+        medicals: formattedMedicals,
+      });
+      console.log(data.medical_id);
+      const formattedMedRec = {
+        act_type: values.medical_act.value,
+        diagnose: values.diagnose_desc ?? "",
+        queue_id,
+        doc_id,
+        patient_id,
+        clinic_id,
+        medical_id: data.medical_id
+      };
+      const { data: dataMedrec } = await axios.post("/api/medrec", {
+        ...formattedMedRec
+      });
+      console.log(dataMedrec)
+      toast.success("Berhasil Menambahkan Data", {
+        id: toastId,
+      });
+      setOpen(false);
+    } catch (err) {
+      toast.error("Gagal Menambahkan Data", {
+        id: toastId,
+      });
+      console.error(err);
+    } finally {
+      setLoadingMutate(false);
+    }
   }
 
   const toggleIsSelected = (index: number) => {
@@ -144,14 +194,14 @@ export function FinishFormSheet({
   };
 
   const changeObatHandler = (val: any) => {
-    if (val === null) return;
+    if (val === null || loadingMutate) return;
     const valIdx = data.findIndex((med: any) => med.value === val.value);
     setSelectedMedicines((current) => [...current, { ...val, quantity: 1 }]);
     toggleIsSelected(valIdx);
   };
 
   const clickTrashHandler = (val: any) => {
-    if (val === null) return;
+    if (val === null || loadingMutate) return;
     const valIdx = data.findIndex((med: any) => med.value === val.value);
     setSelectedMedicines((current) =>
       current.filter((med) => med.value !== val.value)
@@ -160,7 +210,7 @@ export function FinishFormSheet({
   };
 
   const minusQuantityHandler = (val: any) => {
-    if (val.quantity === 1) return;
+    if (val.quantity === 1 || loadingMutate) return;
     const updated = [...selectedMedicines];
     updated.map((up) => {
       val.value === up.value ? (up.quantity -= 1) : up;
@@ -169,7 +219,7 @@ export function FinishFormSheet({
   };
 
   const plusQuantityHandler = (val: any) => {
-    if (val.quantity === val.amount) return;
+    if (val.quantity === val.amount || loadingMutate) return;
     const updated = [...selectedMedicines];
     updated.map((up) => {
       val.value === up.value ? (up.quantity += 1) : up;
@@ -178,11 +228,11 @@ export function FinishFormSheet({
   };
 
   const onMedicineDescChange = (val: string, idx: number) => {
-    const updated = [...selectedMedicines]
-    updated[idx] = {...updated[idx], medDesc: val}
-    setSelectedMedicines(updated)
+    const updated = [...selectedMedicines];
+    updated[idx] = { ...updated[idx], medDesc: val };
+    setSelectedMedicines(updated);
     // console.log(updated)
-  }
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -202,6 +252,7 @@ export function FinishFormSheet({
               <FormField
                 control={form.control}
                 name="medical_act"
+                disabled={loadingMutate}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -210,6 +261,7 @@ export function FinishFormSheet({
                     <FormControl>
                       <ReactSelect
                         {...field}
+                        isDisabled={loadingMutate}
                         options={mediActOptions}
                         isMulti={false}
                         isClearable={false}
@@ -227,7 +279,7 @@ export function FinishFormSheet({
                   options={data}
                   isMulti={false}
                   isClearable={false}
-                  isDisabled={loading}
+                  isDisabled={loading || loadingMutate}
                   placeholder={loading ? "Mengambil Data..." : "Tambahkan Obat"}
                   components={{
                     Option: CustomOption,
@@ -245,27 +297,46 @@ export function FinishFormSheet({
                     className="p-2 border rounded flex flex-col gap-2"
                   >
                     <div className="flex flex-col gap-1">
-                    <div className="flit justify-between">
-                      <h3 className="text-gray-800 font-medium">{med.label}</h3>
-                      <p className="text-sm text-gray-600">Sisa: {med.amount}</p>
+                      <div className="flit justify-between">
+                        <h3 className="text-gray-800 font-medium">
+                          {med.label}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Sisa: {med.amount}
+                        </p>
+                      </div>
+                      <p className="text-xs text-gray-600 font-medium">
+                        {med.id}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-600 font-medium">{med.id}</p>
-                    </div>
-                    {editVal.find(val => val === med.value) ? (
-                      <Input onChange={(ev) => onMedicineDescChange(ev.target.value, idx)} />
+                    {editVal.find((val) => val === med.value) ? (
+                      <Input
+                        disabled={loadingMutate}
+                        onChange={(ev) =>
+                          onMedicineDescChange(ev.target.value, idx)
+                        }
+                      />
                     ) : (
-                    <button type="button" onClick={() => {
-                      setEditVal(curr => [...curr, med.value])
-                    }} className="text-blue-400 text-start text-sm">Tulis Catatan</button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditVal((curr) => [...curr, med.value]);
+                        }}
+                        className="text-blue-400 text-start text-sm"
+                      >
+                        Tulis Catatan
+                      </button>
                     )}
                     <div className="flit justify-between mt-1">
                       <Trash2
+                        aria-disabled={loadingMutate}
                         onClick={() => clickTrashHandler(med)}
                         size={24}
                         className="text-gray-500 cursor-pointer p-1 rounded hover:bg-red-100 hover:text-red-700"
                       />
                       <div className="flit gap-3 text-sm">
                         <Minus
+                          aria-disabled={loadingMutate}
                           onClick={() => minusQuantityHandler(med)}
                           size={16}
                           className={`hover:text-blue-600 cursor-pointer ${
@@ -276,6 +347,7 @@ export function FinishFormSheet({
                         />
                         <div>{med.quantity}</div>
                         <Plus
+                          aria-disabled={loadingMutate}
                           onClick={() => plusQuantityHandler(med)}
                           size={16}
                           className={`hover:text-blue-600 cursor-pointer ${
@@ -297,6 +369,7 @@ export function FinishFormSheet({
                     <FormLabel>Deskripsi Diagnosa</FormLabel>
                     <FormControl>
                       <Textarea
+                        disabled={loadingMutate}
                         placeholder="Isi diagnosa pasien"
                         className="resize-none"
                         {...field}
@@ -314,7 +387,9 @@ export function FinishFormSheet({
             </div>
             <Separator className="my-4" />
             <SheetFooter>
-              <Button type="submit">Konfirmasi & Lanjutkan</Button>
+              <Button disabled={loadingMutate} type="submit">
+                Konfirmasi & Lanjutkan
+              </Button>
             </SheetFooter>
           </form>
         </Form>
