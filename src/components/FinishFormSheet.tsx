@@ -159,7 +159,6 @@ export function FinishFormSheet({
       const {data} = await axios.post("/api/medical", {
         medicals: formattedMedicals,
       });
-      console.log(data.medical_id);
       const formattedMedRec = {
         act_type: values.medical_act.value,
         diagnose: values.diagnose_desc ?? "",
@@ -172,10 +171,11 @@ export function FinishFormSheet({
       const { data: dataMedrec } = await axios.post("/api/medrec", {
         ...formattedMedRec
       });
-      console.log(dataMedrec)
       toast.success("Berhasil Menambahkan Data", {
         id: toastId,
       });
+      setSelectedMedicines([])
+      setEditVal([])
       setOpen(false);
     } catch (err) {
       toast.error("Gagal Menambahkan Data", {
