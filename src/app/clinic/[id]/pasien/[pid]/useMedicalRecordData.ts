@@ -101,6 +101,5 @@ export function useMedicalRecordData({
     });
     return () => unsubscribe();
   }, []);
-  console.log(combinedData);
   return { combinedData, loading, error };
 }

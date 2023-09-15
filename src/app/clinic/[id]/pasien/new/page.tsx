@@ -39,10 +39,10 @@ import { usePathname } from "next/navigation";
 
 const PasienNew = () => {
   const { data } = useSession();
+  const router = useRouter();
   const pathname = usePathname();
   const backUrl = pathname?.split("/").slice(1, 4).join("/");
   const [loading, setLoading] = React.useState<boolean>(false);
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof patientOnlySchema>>({
     resolver: zodResolver(patientOnlySchema),

@@ -45,10 +45,13 @@ import { CalendarIcon } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
 import { useMedicalRecordData } from "./useMedicalRecordData";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const PasienDetail = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const backUrl = pathname?.split("/").slice(1, 4).join("/");
   const patientId = pathname?.split("/")[pathname!.split("/").length - 1];
   const [loading, setLoading] = React.useState<boolean>(false);
 
@@ -66,10 +69,32 @@ const PasienDetail = () => {
   const form = useForm<z.infer<typeof patientOnlySchema>>({
     resolver: zodResolver(patientOnlySchema),
     defaultValues: {},
+    shouldUnregister: false
   });
 
   const onSubmit = async (values: z.infer<typeof patientOnlySchema>) => {
-    console.log(values);
+    setLoading(true);
+    const toastId = toast.loading("Sedang Menyimpan Data...");
+    try {
+      const formatted = {
+        patient: {
+          ...values.patient,
+        },
+        id: patientId,
+      };
+      await axios.patch("/api/pasien", { ...formatted });
+      toast.success("Berhasil Menambahkan Data", {
+        id: toastId,
+      });
+      router.push(`/${backUrl}`);
+    } catch (err: any) {
+      toast.error("Gagal Menambahkan Data", {
+        id: toastId,
+      });
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!patient?.exists() && !loadingPatient) {
@@ -267,7 +292,11 @@ const PasienDetail = () => {
       <h1 className="font-bold text-xl mrt text-blue-400">
         Rekam Medis Pasien
       </h1>
-      {combinedData.length ? (
+      {loadingMedrec ? (
+        <div className="font-semibold mt-1 text-gray-400 border p-2 rounded">
+          Sedang mengambil data...
+        </div>
+      ) : combinedData.length ? (
         <Accordion
           type="multiple"
           className="border rounded-sm p-4 w-full mt-2"
@@ -315,9 +344,7 @@ const PasienDetail = () => {
                 </div>
                 <Separator className="my-2" />
                 <div className="flex flex-col gap-1 mt-2">
-                  <p className="font-medium text-gray-500">
-                    Diagnosa:
-                  </p>
+                  <p className="font-medium text-gray-500">Diagnosa:</p>
                   <h3 className="font-semibold text-blue-900">
                     {med.diagnose}
                   </h3>
@@ -327,7 +354,9 @@ const PasienDetail = () => {
           ))}
         </Accordion>
       ) : (
-        <div className="font-semibold mt-1 text-gray-400">Belum ada rekam medis</div>
+        <div className="font-semibold mt-1 text-gray-400 border p-2 rounded">
+          Belum ada rekam medis
+        </div>
       )}
     </>
   );
