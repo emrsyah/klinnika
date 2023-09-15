@@ -1,7 +1,7 @@
 "use client";
 import { DataTable } from "@/components/table/DataTable";
 import { db } from "@/lib/firebase";
-import { DocumentData, collection, query, where } from "firebase/firestore";
+import { DocumentData, collection, orderBy, query, where } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import React from "react";
 import { useCollection, useCollectionData } from "react-firebase-hooks/firestore";
@@ -14,8 +14,9 @@ const Pasien = () => {
   const [patients, loading, error] = useCollection(
     query(
       collection(db, "patient"),
-      where("clinic_id", "==", data?.user?.clinicId)
-    )
+      where("clinic_id", "==", data?.user?.clinicId),
+      orderBy("created_at", "desc")
+    ),
   );
   return (
     <div>

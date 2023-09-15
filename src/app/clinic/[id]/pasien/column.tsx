@@ -45,15 +45,16 @@ export const columns: ColumnDef<PatientCol>[] = [
   },
   {
     accessorKey: "birth_date",
-    header: "Tanggal Lahir",
+    header: ({ column }) => <ColumnHeader column={column} title="Tanggal Lahir" />,
     cell: ({ row }) => {
       const birth_date: any = row.getValue("birth_date");
       return <div>{dayjs(birth_date.toDate()).format("DD MMM YYYY")}</div>;
     },
+    
   },
   {
     accessorKey: "created_at",
-    header: "Dibuat",
+    header: ({ column }) => <ColumnHeader column={column} title="Dibuat" />,
     cell: ({ row }) => {
       return <div>{dateConverter(row.getValue("created_at"))}</div>;
     },

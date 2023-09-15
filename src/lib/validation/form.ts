@@ -63,3 +63,7 @@ export const queueOnlySchema =z.object({
     userId: z.string().min(1, {message: "user is required"})
 })
 
+export const patientOnlySchema =z.object({
+    ...queueFormSchema.pick({patient: true}).shape,
+})
+

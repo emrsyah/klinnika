@@ -95,7 +95,7 @@ const CustomOption = ({
       <h2 className="text-gray-400 text-sm font-medium">{data.value}</h2>
       <div className="flex items-center gap-2 text-gray-700 text-sm font-medium">
         <h2>Exp: {dayjs(data.expired_at.toDate()).format("DD MMM YYYY")}</h2>|
-        <h2>{data.amount}</h2>
+        <h2>Stok: {data.amount}</h2>
       </div>
     </div>
   ) : null;
