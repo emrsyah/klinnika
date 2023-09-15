@@ -53,6 +53,7 @@ interface DataTableProps<TData, TValue> {
   filterValue: string;
   isLoading: boolean;
   isError: string;
+  focusMode?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -62,6 +63,7 @@ export function DataTable<TData, TValue>({
   filterValue,
   isLoading,
   isError,
+  focusMode= false
 }: DataTableProps<TData, TValue>) {
   const params = useSearchParams()!;
   const pathname = usePathname();
@@ -149,6 +151,7 @@ export function DataTable<TData, TValue>({
             <RefreshCcw size={16} />
             Reset Default
           </Button>
+          {focusMode ? (
           <Select value={mode as string} onValueChange={changeModeHandler}>
             <SelectTrigger className="w-fit gap-2 font-semibold text-blue-900">
               <SelectValue className="whitespace-nowrap" placeholder="Mode" />
@@ -160,6 +163,7 @@ export function DataTable<TData, TValue>({
               </SelectGroup>
             </SelectContent>
           </Select>
+          ) : null}
         </div>
         <div className="flit gap-4 w-full">
           <Input

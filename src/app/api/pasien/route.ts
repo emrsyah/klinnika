@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
 import { queueFormSchema } from "@/lib/validation/form";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
       ...formattedPatient.patient,
       birth_date: birthDate,
       clinic_id: json.clinicId,
+      created_at: serverTimestamp()
     };
     const newPatient = await addDoc(collection(db, "patient"), {
         ...readyToAddPatientFormat

@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Timestamp } from "firebase/firestore";
+import { DocumentData, QuerySnapshot, Timestamp } from "firebase/firestore";
 dayjs.extend(relativeTime);
 dayjs.extend(isToday);
 
@@ -46,3 +46,12 @@ export function queueTypeToColorConverter(type: string) {
     ? "purple"
     : "blue";
 }
+
+export  function mappingToArray({data}: { data: QuerySnapshot<DocumentData, DocumentData> | undefined}) {
+  if(data === undefined) return
+  const mapped = data.docs.map((doc) => {
+    return { ...doc.data(), id: doc.id };
+  });
+  return mapped
+}
+
