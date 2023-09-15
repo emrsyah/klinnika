@@ -128,8 +128,6 @@ const AntrianNew = () => {
     const toastId = toast.loading("Sedang Menambahkan Data...");
     try {
       if (!isOldPatient) {
-        // console.log(typeof values.patient.birthDate)
-        // console.log(typeof new Date() === typeof values.patient.birthDate)
         const formattedPatient = {
           patient: {
             ...values.patient,

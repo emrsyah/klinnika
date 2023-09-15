@@ -21,6 +21,8 @@ export async function POST(request: NextRequest) {
       ...formattedPatient.patient,
       birth_date: birthDate,
       clinic_id: json.clinicId,
+      nik: formattedPatient.patient.nik ?? "",
+      email: formattedPatient.patient.email ?? "",
       created_at: serverTimestamp()
     };
     const newPatient = await addDoc(collection(db, "patient"), {

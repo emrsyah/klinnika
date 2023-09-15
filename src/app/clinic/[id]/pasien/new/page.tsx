@@ -1,6 +1,6 @@
-"use client"
+"use client";
 import * as z from "zod";
-import * as React from 'react'
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { patientOnlySchema } from "@/lib/validation/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,16 +14,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const PasienNew = () => {
-  const [loading, setLoading] = React.useState<boolean>(false)
+  const { data } = useSession();
+  const pathname = usePathname();
+  const backUrl = pathname?.split("/").slice(1, 4).join("/");
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof patientOnlySchema>>({
     resolver: zodResolver(patientOnlySchema),
@@ -36,7 +55,30 @@ const PasienNew = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof patientOnlySchema>) => {
-    console.log(values.patient);
+    setLoading(true);
+    const toastId = toast.loading("Sedang Menambahkan Data...");
+    try {
+      const formattedPatient = {
+        patient: {
+          ...values.patient,
+        },
+        clinicId: data?.user?.clinicId,
+      };
+      await axios.post("/api/pasien", {
+        ...formattedPatient,
+      });
+      toast.success("Berhasil Menambahkan Data", {
+        id: toastId,
+      });
+      router.push(`/${backUrl}`);
+    } catch (err: any) {
+      toast.error("Gagal Menambahkan Data", {
+        id: toastId,
+      });
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -84,7 +126,7 @@ const PasienNew = () => {
                       Pilih Gender<span className="text-red-600">*</span>
                     </FormLabel>
                     <Select
-                      disabled={ loading}
+                      disabled={loading}
                       onValueChange={field.onChange}
                       //   defaultValue={"Hari Ini"}
                       value={field.value}
@@ -113,11 +155,7 @@ const PasienNew = () => {
                       Nomor Telepon<span className="text-red-600">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input
-                        disabled={loading}
-                        placeholder="08"
-                        {...field}
-                      />
+                      <Input disabled={loading} placeholder="08" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,10 +171,7 @@ const PasienNew = () => {
                       Tanggal Lahir<span className="text-red-600">*</span>
                     </FormLabel>
                     <Popover>
-                      <PopoverTrigger
-                        disabled={loading}
-                        asChild
-                      >
+                      <PopoverTrigger disabled={loading} asChild>
                         <FormControl>
                           <Button
                             variant={"outline"}
@@ -214,7 +249,9 @@ const PasienNew = () => {
               />
             </div>
           </div>
-          <Button className="mt-3">Konfirmasi & Tambahkan</Button>
+          <Button className="mt-3" disabled={loading}>
+            Konfirmasi & Tambahkan
+          </Button>
         </form>
       </Form>
     </>
