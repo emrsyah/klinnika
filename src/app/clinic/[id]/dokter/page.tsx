@@ -1,6 +1,6 @@
 "use client";
 import { DataTable } from "@/components/table/DataTable";
-import { db } from "@/lib/firebase";
+import { db } from "../../../../../lib/firebase";
 import { DocumentData, collection, orderBy, query, where } from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import React from "react";

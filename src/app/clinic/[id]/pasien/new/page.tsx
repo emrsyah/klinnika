@@ -2,12 +2,11 @@
 import * as z from "zod";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { patientOnlySchema } from "@/lib/validation/form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { patientOnlySchema } from "@/lib/validation/form";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,

@@ -8,7 +8,7 @@ const isEmail = (value: string) => {
 
 export const queueFormSchema = z.object({
   patient: z.object({
-    id: z.string().min(1, {message: "user id wajib"}).optional(),
+    id: z.string().min(1, { message: "user id wajib" }).optional(),
     name: z.string().min(5, { message: "nama minimal 5 huruf" }),
     email: z
       .string()
@@ -30,8 +30,8 @@ export const queueFormSchema = z.object({
     phone: z
       .string({ required_error: "nomor telepon wajib dimasukkan" })
       .trim()
-      .min(10, {message: "wajib mengiisi nomor telepon"})
-      .max(13, {message: "masukkan nomor telepon benar (10-13 huruf)"}),
+      .min(10, { message: "wajib mengiisi nomor telepon" })
+      .max(13, { message: "masukkan nomor telepon benar (10-13 huruf)" }),
     birthDate: z.date({ required_error: "tanggal lahir wajib dimasukkan" }),
   }),
   complaint: z.object({
@@ -58,12 +58,94 @@ export const queueFormSchema = z.object({
   }),
 });
 
-export const queueOnlySchema =z.object({
-    ...queueFormSchema.pick({complaint: true}).shape,
-    userId: z.string().min(1, {message: "user is required"})
+export const queueOnlySchema = z.object({
+  ...queueFormSchema.pick({ complaint: true }).shape,
+  userId: z.string().min(1, { message: "user is required" }),
+});
+
+export const patientOnlySchema = z.object({
+  ...queueFormSchema.pick({ patient: true }).shape,
+});
+
+export const polyclinicArr = [
+  "Umum",
+  "Gigi",
+  "Ibu & Anak",
+  "Mata",
+  "Penyakit Dalam",
+  "Saraf",
+];
+
+export const doctorFormSchema = z.object({
+  doctor: z.object({
+    name: z.string(),
+    email: z.string().email({ message: "input valid email" }),
+    password: z
+      .string()
+      .min(8, { message: "minimal password is 8 long" })
+      .max(16, { message: "maximal password is 16 long" }),
+    gender: z.enum(["Laki-laki", "Perempuan"], {
+      required_error: "gender wajib diisi",
+    }),
+    phone: z
+      .string({ required_error: "nomor telepon wajib dimasukkan" })
+      .trim()
+      .min(10, { message: "wajib mengiisi nomor telepon" })
+      .max(13, { message: "masukkan nomor telepon benar (10-13 huruf)" }),
+    price: z.number().min(0, { message: "minimal 0 rupiah" }),
+    polyclinic: z.enum([
+      "Umum",
+      "Gigi",
+      "Ibu & Anak",
+      "Mata",
+      "Penyakit Dalam",
+      "Saraf",
+    ]),
+  }),
+  schedules: z.object({
+    Senin: z
+      .object({
+        startTime: z.date(),
+        endTime: z.date(),
+      }),
+    Selasa: z
+      .object({
+        startTime: z.date(),
+        endTime: z.date(),
+      }),
+    Rabu: z
+      .object({
+        startTime: z.date(),
+        endTime: z.date(),
+      }),
+    Kamis: z
+      .object({
+        startTime: z.date(),
+        endTime: z.date(),
+      }),
+    Jumat: z
+      .object({
+        startTime: z.date(),
+        endTime: z.date(),
+      }),
+    Sabtu: z
+      .object({
+        startTime: z.date(),
+        endTime: z.date(),
+      }),
+    Minggu: z
+      .object({
+        startTime: z.date(),
+        endTime: z.date(),
+      }),
+  }),
+});
+
+export const doctorOnlySchema = z.object({
+  ...doctorFormSchema.pick({doctor: true}).shape
 })
 
-export const patientOnlySchema =z.object({
-    ...queueFormSchema.pick({patient: true}).shape,
+export const schedulesOnlySchema = z.object({
+  ...doctorFormSchema.pick({schedules: true}).shape
 })
 

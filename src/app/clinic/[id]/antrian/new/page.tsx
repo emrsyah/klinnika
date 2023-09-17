@@ -35,7 +35,7 @@ import {
 import ReactSelect from "react-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "../../../../../../lib/firebase";
 import {
   QueryDocumentSnapshot,
   SnapshotOptions,

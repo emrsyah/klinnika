@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase";
+import { db } from "../../../../lib/firebase";
 import { medicalSchema } from "@/lib/validation/api";
 import { addDoc, collection, doc, serverTimestamp, increment, writeBatch } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";

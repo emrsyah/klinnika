@@ -55,3 +55,37 @@ export  function mappingToArray({data}: { data: QuerySnapshot<DocumentData, Docu
   return mapped
 }
 
+
+
+type InputObj = Record<string, { startTime: Date; endTime: Date }>;
+
+type OutputObj = { days: string; startTime: Date; endTime: Date }[];
+
+export function convertToObjectArray(input: InputObj): OutputObj {
+  return Object.keys(input).map((day) => ({
+    days: day,
+    ...input[day],
+  }));
+}
+
+
+type Schedule = {
+  startTime: Date;
+  endTime: Date;
+};
+
+type SchedulesObject = Record<string, Schedule>;
+
+export function schedulesConvertToDates(input: SchedulesObject): SchedulesObject {
+  const converted: SchedulesObject = {};
+
+  for (const day in input) {
+    const { startTime, endTime } = input[day];
+    converted[day] = {
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    };
+  }
+
+  return converted;
+}

@@ -1,5 +1,5 @@
 "use client";
-import { db } from "@/lib/firebase";
+import { db } from "../../../../../../lib/firebase";
 import { mappingToArray } from "@/lib/utils";
 import { collection, doc, orderBy, query, where } from "firebase/firestore";
 import { usePathname, useRouter } from "next/navigation";

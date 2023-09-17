@@ -1,4 +1,4 @@
-import { db } from "@/lib/firebase";
+import { db } from "../../../../lib/firebase";
 import { queueFormSchema } from "@/lib/validation/form";
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";

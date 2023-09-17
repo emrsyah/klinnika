@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth } from "../../../../lib/firebase";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
-import { db } from "@/lib/firebase";
+import { db } from "../../../../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
 export default NextAuth({

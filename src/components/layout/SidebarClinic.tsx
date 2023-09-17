@@ -2,7 +2,7 @@
 import React from "react";
 import ClinicIcon from "@/components/ClinicIcon";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/firebase";
+import { db } from "../../../lib/firebase";
 
 import {
   Archive,
@@ -126,7 +126,7 @@ const SidebarClinic = () => {
           {additionalSidebar.map((sidebar) => (
             <Link
               key={sidebar.name}
-              href={sidebar.href}
+              href={`/${basePath}/${sidebar.href}`}
               className={`flit gap-3 mrt font-semibold p-3 cursor-pointer rounded-bl rounded-tl ${
                 sidebar.href === currentPath
                   ? "text-blue-900 bg-blue-50"
