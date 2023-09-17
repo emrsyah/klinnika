@@ -89,3 +89,31 @@ export function schedulesConvertToDates(input: SchedulesObject): SchedulesObject
 
   return converted;
 }
+
+export interface DayEntry {
+  days: string;
+  startTime: any;
+  endTime: any;
+}
+
+interface Result {
+  [key: string]: {
+    startTime: Date;
+    endTime: Date;
+  };
+}
+
+export function transformArrayToJson(inputArray: DayEntry[] | undefined) : any {
+  const result: Result = {};
+  if(inputArray === undefined) return {}
+  inputArray.forEach((entry) => {
+    const { days, startTime, endTime } = entry;
+
+    result[days] = {
+      startTime: startTime.toDate(),
+      endTime: endTime.toDate(),
+    };
+  });
+
+  return result;
+}

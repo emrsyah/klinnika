@@ -65,15 +65,6 @@ const DokterNew = () => {
     resolver: zodResolver(doctorFormSchema),
     defaultValues: {
       schedules: { ...defaultValues.schedules },
-      doctor: {
-        email: "abdulla@gmail.com",
-        gender: "Laki-laki",
-        name: "abdulla",
-        password: "12345678",
-        phone: "082138495866",
-        polyclinic: "Umum",
-        price: 120000
-      }
     },
   });
 
@@ -84,16 +75,11 @@ const DokterNew = () => {
       const userRes = await axios.post("/api/dokter", {
         doctor: { ...values.doctor, clinic_id: data?.user?.clinicId },
       });
-      // console.log({
-      //   schedules: {
-      //     ...values.schedules,
-      //   },
-      // });
       await axios.post("/api/schedules", {
         schedules: {
           ...values.schedules,
         },
-        userId: userRes.data
+        userId: userRes.data,
       });
       toast.success("Berhasil Menambahkan Data", {
         id: toastId,
@@ -109,14 +95,9 @@ const DokterNew = () => {
     }
   };
 
-  const testAdm = async () => {
-    console.log("tes admin");
-    axios.post("/api/admin");
-  };
 
   return (
     <>
-      <Button onClick={testAdm}>Coba Test</Button>
       <h1 className="font-bold text-xl mrt text-blue-400">
         Tambah Dokter Baru
       </h1>
@@ -316,6 +297,7 @@ const DokterNew = () => {
                         <FormLabel>Waktu Mulai</FormLabel>
                         <FormControl>
                           <TimePicker
+                            disabled={loading}
                             className="border p-2 rounded w-full"
                             // selected={startDate}
                             {...field}
@@ -365,7 +347,7 @@ const DokterNew = () => {
                             // minTime={form.getValues("schedules.Senin.startTime")}
                             disabled={
                               form.getValues("schedules.Senin.startTime") ===
-                              undefined
+                                undefined || loading
                             }
                             minTime={setHours(
                               setMinutes(
@@ -414,6 +396,7 @@ const DokterNew = () => {
                         <FormLabel>Waktu Mulai</FormLabel>
                         <FormControl>
                           <TimePicker
+                            disabled={loading}
                             className="border p-2 rounded w-full"
                             // selected={startDate}
                             {...field}
@@ -463,7 +446,7 @@ const DokterNew = () => {
                             // minTime={form.getValues("schedules.Selasa.startTime")}
                             disabled={
                               form.getValues("schedules.Selasa.startTime") ===
-                              undefined
+                                undefined || loading
                             }
                             minTime={setHours(
                               setMinutes(
@@ -512,6 +495,7 @@ const DokterNew = () => {
                         <FormLabel>Waktu Mulai</FormLabel>
                         <FormControl>
                           <TimePicker
+                            disabled={loading}
                             className="border p-2 rounded w-full"
                             // selected={startDate}
                             {...field}
@@ -561,7 +545,7 @@ const DokterNew = () => {
                             // minTime={form.getValues("schedules.Rabu.startTime")}
                             disabled={
                               form.getValues("schedules.Rabu.startTime") ===
-                              undefined
+                                undefined || loading
                             }
                             minTime={setHours(
                               setMinutes(
@@ -610,6 +594,7 @@ const DokterNew = () => {
                         <FormLabel>Waktu Mulai</FormLabel>
                         <FormControl>
                           <TimePicker
+                            disabled={loading}
                             className="border p-2 rounded w-full"
                             // selected={startDate}
                             {...field}
@@ -659,7 +644,7 @@ const DokterNew = () => {
                             // minTime={form.getValues("schedules.Kamis.startTime")}
                             disabled={
                               form.getValues("schedules.Kamis.startTime") ===
-                              undefined
+                                undefined || loading
                             }
                             minTime={setHours(
                               setMinutes(
@@ -708,6 +693,7 @@ const DokterNew = () => {
                         <FormLabel>Waktu Mulai</FormLabel>
                         <FormControl>
                           <TimePicker
+                            disabled={loading}
                             className="border p-2 rounded w-full"
                             // selected={startDate}
                             {...field}
@@ -757,7 +743,7 @@ const DokterNew = () => {
                             // minTime={form.getValues("schedules.Jumat.startTime")}
                             disabled={
                               form.getValues("schedules.Jumat.startTime") ===
-                              undefined
+                                undefined || loading
                             }
                             minTime={setHours(
                               setMinutes(
@@ -806,6 +792,7 @@ const DokterNew = () => {
                         <FormLabel>Waktu Mulai</FormLabel>
                         <FormControl>
                           <TimePicker
+                            disabled={loading}
                             className="border p-2 rounded w-full"
                             // selected={startDate}
                             {...field}
@@ -855,7 +842,7 @@ const DokterNew = () => {
                             // minTime={form.getValues("schedules.Sabtu.startTime")}
                             disabled={
                               form.getValues("schedules.Sabtu.startTime") ===
-                              undefined
+                                undefined || loading
                             }
                             minTime={setHours(
                               setMinutes(
@@ -907,6 +894,7 @@ const DokterNew = () => {
                             className="border p-2 rounded w-full"
                             // selected={startDate}
                             {...field}
+                            disabled={loading}
                             value={
                               field.value
                                 ? dayjs(field.value).format("HH:mm")
@@ -953,7 +941,7 @@ const DokterNew = () => {
                             // minTime={form.getValues("schedules.Minggu.startTime")}
                             disabled={
                               form.getValues("schedules.Minggu.startTime") ===
-                              undefined
+                                undefined || loading
                             }
                             minTime={setHours(
                               setMinutes(
@@ -990,7 +978,7 @@ const DokterNew = () => {
               <Separator className="my-1 col-span-2" />
             </div>
           </div>
-          <Button type="submit">Konfirmasi & Tambahkan</Button>
+          <Button type="submit" disabled={loading}>Konfirmasi & Tambahkan</Button>
         </form>
       </Form>
     </>

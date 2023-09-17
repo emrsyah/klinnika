@@ -4,6 +4,7 @@ import {
   doc,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { NextRequest, NextResponse } from "next/server";
 import { customInitApp } from "../../../../lib/firebase-admin-config";
@@ -34,6 +35,27 @@ export async function POST(request: NextRequest) {
     const userDocRef = doc(db, "user", userId);
     const docRef = await setDoc(userDocRef, { ...formatted });
     return new NextResponse(JSON.stringify(userId), {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err: any) {
+    const error_response = {
+      status: "error",
+      message: err.message,
+    };
+    return new NextResponse(JSON.stringify(error_response), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const json = await request.json();
+    doctorOnlySchema.parse(json);
+    await updateDoc(doc(db, "user", json.uid), json.doctor)
+    return new NextResponse(JSON.stringify({}), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });

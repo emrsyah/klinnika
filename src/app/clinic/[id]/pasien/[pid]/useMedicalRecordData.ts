@@ -59,7 +59,6 @@ export function useMedicalRecordData({
       const observables = snapshot.docs.map((doc) => {
         const data = doc.data();
         const dataId = doc.id;
-        console.log(data)
         const medicalId = data.medical_id;
         const doctorId = data.doc_id;
 
