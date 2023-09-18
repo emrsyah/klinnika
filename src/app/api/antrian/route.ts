@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
 
     let q = query(
       collection(db, "queue"),
-      where("clinic_id", "==", json.clinicId)
+      where("clinic_id", "==", json.clinicId),
+      where("doctor_id", "==", json.complaint.doctor.value)
     );
 
     if (appointmentDate === today) {
