@@ -3,7 +3,6 @@ import QueueTypeBadge from "@/components/QueueTypeBadge";
 import { ColumnHeader } from "@/components/table/ColumnHeader";
 import { dateConverter } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import dayjs from "dayjs";
 
 export type DoctorCol = {
   id: string;

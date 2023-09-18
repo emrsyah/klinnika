@@ -108,7 +108,7 @@ const SidebarClinic = () => {
             <Link
               key={sidebar.name}
               href={`/${basePath}/${sidebar.href}`}
-              className={`flit gap-3 mrt font-semibold p-3 cursor-pointer rounded-bl rounded-tl ${
+              className={`flit gap-3 mrt font-semibold p-3 hover:bg-blue-50 cursor-pointer rounded-bl rounded-tl ${
                 sidebar.href === currentPath
                   ? "text-blue-900 bg-blue-50"
                   : "bg-white text-gray-500"
@@ -127,7 +127,7 @@ const SidebarClinic = () => {
             <Link
               key={sidebar.name}
               href={`/${basePath}/${sidebar.href}`}
-              className={`flit gap-3 mrt font-semibold p-3 cursor-pointer rounded-bl rounded-tl ${
+              className={`flit gap-3 mrt font-semibold p-3 hover:bg-blue-50 cursor-pointer rounded-bl rounded-tl ${
                 sidebar.href === currentPath
                   ? "text-blue-900 bg-blue-50"
                   : "bg-white text-gray-500"
