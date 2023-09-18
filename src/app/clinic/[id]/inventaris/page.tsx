@@ -1,6 +1,12 @@
-"use client"
+"use client";
 import { DataTable } from "@/components/table/DataTable";
-import { DocumentData, collection, orderBy, query, where } from "firebase/firestore";
+import {
+  DocumentData,
+  collection,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { useSession } from "next-auth/react";
 import * as React from "react";
 import { useCollection } from "react-firebase-hooks/firestore";

@@ -27,11 +27,12 @@ export type Queue = {
 export const columns: ColumnDef<Queue>[] = [
   {
     accessorKey: "order_number",
-    header: ({ column }) => <ColumnHeader column={column} title="Nomor" />,
+    header: ({ column }) => <ColumnHeader column={column} title="Nomor Antrian" />,
     cell: ({ row }) => {
+      const docName: string = row.getValue("doctor_name")
       return (
-        <div className="flit h-8 w-8 justify-center text-blue-800 rounded-full bg-blue-100">
-          {row.getValue("order_number")}
+        <div className="flit px-3 py-2 w-fit text-blue-800 whitespace-nowrap rounded-full bg-blue-100">
+          {row.getValue("order_number")} | Dr. {docName?.split(" ")[0]}
         </div>
       );
     },
@@ -65,11 +66,11 @@ export const columns: ColumnDef<Queue>[] = [
   },
   {
     accessorKey: "doctor.name",
-    header: "Dokter",
+    header: ({ column }) => <ColumnHeader column={column} title="Id" className="hidden" />,
     cell: ({ row }) => {
       const docName: string = row.getValue("doctor_name")
       return (
-        <span className="line-clamp-1">
+        <span className="line-clamp-1 hidden">
           {`Dr. ${docName}`}
         </span>
       );

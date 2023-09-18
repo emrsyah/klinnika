@@ -51,6 +51,7 @@ import { queueFormSchema } from "@/lib/validation/form";
 import toast from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
 
+
 export const keluhanType = [
   { value: "Demam", label: "Demam" },
   { value: "Flu", label: "Flu" },
@@ -89,6 +90,27 @@ export const selectableConverter: FirestoreDataConverter<Selectable<string>> = {
   },
 };
 
+export const selectableConverterPatient: FirestoreDataConverter<Selectable<string>> = {
+  toFirestore(
+    patientSelectable: WithFieldValue<Selectable<string>>
+  ): DocumentData {
+    return { label: patientSelectable.label, value: patientSelectable.value };
+  },
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options: SnapshotOptions
+  ): Selectable<string> {
+    const data = snapshot.data(options);
+    const dLabel = `${data.name}`
+    return {
+      // id: snapshot.id,
+      ...data,
+      label: dLabel,
+      value: snapshot.id,
+    };
+  },
+};
+
 const AntrianNew = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -100,7 +122,7 @@ const AntrianNew = () => {
   const patientRef = query(
     collection(db, "patient"),
     where("clinic_id", "==", data?.user?.clinicId)
-  ).withConverter(selectableConverter);
+  ).withConverter(selectableConverterPatient);
 
   const doctorRef = query(
     collection(db, "user"),

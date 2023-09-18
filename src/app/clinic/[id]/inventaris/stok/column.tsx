@@ -1,17 +1,19 @@
 "use client";
 import QueueTypeBadge from "@/components/QueueTypeBadge";
 import { ColumnHeader } from "@/components/table/ColumnHeader";
-import { dateConverter, rupiahConverter } from "@/lib/utils";
+import { dateConverter } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
+import dayjs from "dayjs";
+import isToday from "dayjs/plugin/isToday";
+dayjs.extend(isToday)
 
 export type InventoryCol = {
   id: string;
   name: string;
-  type: "medicines" | "non-medicines";
-  price: number;
   desc: string;
-  unit_type: "tablet" | "pcs" | "pill" | "botol";
-  createdAt: Date;
+  amount: number;
+  expired_at: Date;
+  created_at: Date;
 };
 
 export const columns: ColumnDef<InventoryCol>[] = [
@@ -26,19 +28,12 @@ export const columns: ColumnDef<InventoryCol>[] = [
     },
   },
   {
-    accessorKey: "name",
+    accessorKey: "info.name",
     header: ({ column }) => <ColumnHeader column={column} title="Nama" />,
   },
   {
-    accessorKey: "type",
-    header: "Tipe",
-  },
-  {
-    accessorKey: "price",
-    header: "Harga",
-    cell: ({row}) => {
-        return <>{rupiahConverter(row.getValue("price"))}</>
-    }
+    accessorKey: "amount",
+    header: ({ column }) => <ColumnHeader column={column} title="Jumlah" />,
   },
   {
     accessorKey: "desc",
@@ -48,12 +43,13 @@ export const columns: ColumnDef<InventoryCol>[] = [
     }
   },
   {
-    accessorKey: "unit_type",
-    header: "Satuan",
+    accessorKey: "expired_at",
+    header: ({ column }) => <ColumnHeader column={column} title="Kadaluarsa" />,
     cell: ({ row }) => {
-      const unit_type: string = row.getValue("unit_type");
-      const variants = unit_type === "tablet" ? "blue" : unit_type === "pcs" ? "purple" : unit_type === "pill" ? "green" : "yellow"
-      return <QueueTypeBadge type={variants}>{unit_type}</QueueTypeBadge>;
+      const exp: any = row.getValue("expired_at");
+      const today = new Date()
+      today.setHours(0)
+      return <div className={`${dayjs(exp.toDate()).isToday() || exp.toDate() < today ? "text-red-500 font-medium" : ""}`}>{dayjs(exp.toDate()).format("DD MMM YYYY")}</div>;
     },
   },
   {

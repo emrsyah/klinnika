@@ -5,30 +5,32 @@ import {
   query,
   where,
   doc,
+  onSnapshot,
   getDoc,
-  getDocs,
 } from "firebase/firestore";
 import * as React from "react";
 
-export const useMedicinesData = (clinicId: string) => {
+export const useInventoryStock = (clinicId: string) => {
   const [medicines, setMedicines] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+
   React.useEffect(() => {
     const medicinesRef = query(
       collection(db, "inventory_stock"),
       where("clinic_id", "==", clinicId),
       orderBy("expired_at", "asc")
     );
-    const fetchData = async () => {
+
+    const unsubscribe = onSnapshot(medicinesRef, (querySnapshot) => {
       try {
         setLoading(true);
         setError(null);
 
-        const snapshot = await getDocs(medicinesRef);
         const promises: Promise<void>[] = [];
         const medicineWithInfo: Array<any> = [];
-        snapshot.forEach((docData) => {
+
+        querySnapshot.forEach((docData) => {
           const data = docData.data();
           const dataId = docData.id;
           const inventoryId = data.inventory_id;
@@ -52,21 +54,27 @@ export const useMedicinesData = (clinicId: string) => {
               medicineWithInfo.push(combined);
             }
           });
+
           promises.push(inventoryPromise);
         });
-        Promise.all(promises);
-        setMedicines(medicineWithInfo)
-        // console.log(medicineWithInfo)
-        setError(null);
+
+        Promise.all(promises).then(() => {
+          setMedicines(medicineWithInfo);
+          setError(null);
+        });
       } catch (err) {
         console.error("terjadi kesalahan di pengambilan data");
         setError("terjadi kesalahan di pengambilan data");
-      } finally{
-        setLoading(false)
-        
+      } finally {
+        setLoading(false);
       }
+    });
+
+    return () => {
+      // Unsubscribe from the snapshot listener when the component unmounts.
+      unsubscribe();
     };
-    fetchData()
-  }, []);
+  }, [clinicId]);
+
   return { medicines, loading, error };
 };

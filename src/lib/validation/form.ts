@@ -103,49 +103,56 @@ export const doctorFormSchema = z.object({
     ]),
   }),
   schedules: z.object({
-    Senin: z
-      .object({
-        startTime: z.date(),
-        endTime: z.date(),
-      }),
-    Selasa: z
-      .object({
-        startTime: z.date(),
-        endTime: z.date(),
-      }),
-    Rabu: z
-      .object({
-        startTime: z.date(),
-        endTime: z.date(),
-      }),
-    Kamis: z
-      .object({
-        startTime: z.date(),
-        endTime: z.date(),
-      }),
-    Jumat: z
-      .object({
-        startTime: z.date(),
-        endTime: z.date(),
-      }),
-    Sabtu: z
-      .object({
-        startTime: z.date(),
-        endTime: z.date(),
-      }),
-    Minggu: z
-      .object({
-        startTime: z.date(),
-        endTime: z.date(),
-      }),
+    Senin: z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    }),
+    Selasa: z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    }),
+    Rabu: z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    }),
+    Kamis: z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    }),
+    Jumat: z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    }),
+    Sabtu: z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    }),
+    Minggu: z.object({
+      startTime: z.date(),
+      endTime: z.date(),
+    }),
   }),
 });
 
 export const doctorOnlySchema = z.object({
-  ...doctorFormSchema.pick({doctor: true}).shape
-})
+  ...doctorFormSchema.pick({ doctor: true }).shape,
+});
 
 export const schedulesOnlySchema = z.object({
-  ...doctorFormSchema.pick({schedules: true}).shape
-})
+  ...doctorFormSchema.pick({ schedules: true }).shape,
+});
 
+export const inventoryFormSchema = z.object({
+  inventory: z.object({
+    name: z.string(),
+    type: z.enum(["medicines", "non-medicines"], {
+      required_error: "tipe inventaris wajib diisi",
+    }),
+    unit_type: z.enum(["tablet" , "pcs" , "pill" , "botol"], {
+      required_error: "tipe unit wajib diisi",
+    }),
+    price: z.number(),
+    min: z.number(),
+    desc: z.string().optional(),
+  }),
+});
