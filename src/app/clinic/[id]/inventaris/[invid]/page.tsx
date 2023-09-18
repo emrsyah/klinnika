@@ -37,13 +37,19 @@ import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { inventoryFormSchema } from "@/lib/validation/form";
+import { useDocumentData } from "react-firebase-hooks/firestore";
+import { doc } from "firebase/firestore";
+import { db } from "../../../../../../lib/firebase";
 
-const InventarisNew = () => {
+const InventarisDetail = () => {
   const { data } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const invId = pathname?.split("/")[pathname!.split("/").length - 1];
   const backUrl = pathname?.split("/").slice(1, 4).join("/");
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [inventory, loadingInv, errorInv] = useDocumentData(doc(db, "inventory", invId!))
+  console.log(inventory)
 
   const form = useForm<z.infer<typeof inventoryFormSchema>>({
     resolver: zodResolver(inventoryFormSchema),
@@ -56,24 +62,23 @@ const InventarisNew = () => {
 
   const onSubmit = async (values: z.infer<typeof inventoryFormSchema>) => {
     setLoading(true);
-    console.log(values);
-    const toastId = toast.loading("Sedang Menambahkan Data...");
+    const toastId = toast.loading("Sedang Menyimpan Data...");
     try {
       const formattedInventory = {
         inventory: {
           ...values.inventory,
         },
-        clinicId: data?.user?.clinicId,
+        id: invId
       };
-      await axios.post("/api/inventaris", {
+      await axios.patch("/api/inventaris", {
         ...formattedInventory,
       });
-      toast.success("Berhasil Menambahkan Data", {
+      toast.success("Berhasil Menyimpan Data", {
         id: toastId,
       });
       router.push(`/${backUrl}`);
     } catch (err: any) {
-      toast.error("Gagal Menambahkan Data", {
+      toast.error("Gagal Menyimpan Data", {
         id: toastId,
       });
       console.error(err);
@@ -82,10 +87,14 @@ const InventarisNew = () => {
     }
   };
 
+  if(loadingInv){
+    return<>Loading...</>
+  }
+
   return (
     <>
       <h1 className="font-bold text-xl mrt text-blue-400">
-        Tambah Inventaris Baru
+        Detail Inventaris
       </h1>
       <Form {...form}>
         <form
@@ -93,13 +102,14 @@ const InventarisNew = () => {
           className="border rounded-sm p-4 flex flex-col w-full gap-2 mt-2"
         >
           <div className="flex flex-col gap-2">
-            <h2 className="formSubTitle">Data Pasien</h2>
+            <h2 className="formSubTitle">Inventaris</h2>
             <Separator />
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <FormField
                 disabled={loading}
                 control={form.control}
                 name="inventory.name"
+                defaultValue={inventory ? inventory!.name : ""}
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>
@@ -121,6 +131,7 @@ const InventarisNew = () => {
                 disabled={loading}
                 control={form.control}
                 name="inventory.type"
+                defaultValue={inventory ? inventory!.type : ""}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -152,6 +163,7 @@ const InventarisNew = () => {
                 disabled={loading}
                 control={form.control}
                 name="inventory.unit_type"
+                defaultValue={inventory ? inventory!.unit_type : ""}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -183,6 +195,7 @@ const InventarisNew = () => {
                 disabled={loading}
                 control={form.control}
                 name="inventory.price"
+                defaultValue={inventory ? inventory!.price : ""}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -206,6 +219,7 @@ const InventarisNew = () => {
                 disabled={loading}
                 control={form.control}
                 name="inventory.min"
+                defaultValue={inventory ? inventory!.min : ""}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -230,6 +244,7 @@ const InventarisNew = () => {
                 disabled={loading}
                 control={form.control}
                 name="inventory.desc"
+                defaultValue={inventory ? inventory!.desc : ""}
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>Deskripsi</FormLabel>
@@ -251,7 +266,7 @@ const InventarisNew = () => {
             </div>
           </div>
           <Button className="mt-3" disabled={loading}>
-            Konfirmasi & Tambahkan
+            Konfirmasi & Simpan
           </Button>
         </form>
       </Form>
@@ -259,4 +274,4 @@ const InventarisNew = () => {
   );
 };
 
-export default InventarisNew;
+export default InventarisDetail;

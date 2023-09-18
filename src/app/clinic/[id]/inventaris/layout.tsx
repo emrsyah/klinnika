@@ -1,6 +1,6 @@
 "use client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 export default function InventoryLayout({
   children, // will be a page or nested layout
@@ -10,10 +10,10 @@ export default function InventoryLayout({
   const router = useRouter();
   const pathname = usePathname();
   const basePath = pathname?.split("/").slice(0, 3).join("/");
-
+  const params = useParams()
   return (
     <>
-      <Tabs className={`mb-2 ${pathname?.includes("new") ? "hidden" : ""} `} value={pathname?.includes("stok") ? "stock" : "default"}>
+      <Tabs className={`mb-2 ${pathname?.includes("new") || params?.invid !== undefined ? "hidden" : ""} `} value={pathname?.includes("stok") ? "stock" : "default"}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="default" onClick={() => router.push(`${basePath}/inventaris`)}>
             Inventaris

@@ -152,7 +152,7 @@ export const inventoryFormSchema = z.object({
       required_error: "tipe unit wajib diisi",
     }),
     price: z.number(),
-    min: z.number(),
+    min: z.number().min(0),
     desc: z.string().optional(),
   }),
 });

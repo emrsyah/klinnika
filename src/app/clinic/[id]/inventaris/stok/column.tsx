@@ -49,7 +49,8 @@ export const columns: ColumnDef<InventoryCol>[] = [
       const exp: any = row.getValue("expired_at");
       const today = new Date()
       today.setHours(0)
-      return <div className={`${dayjs(exp.toDate()).isToday() || exp.toDate() < today ? "text-red-500 font-medium" : ""}`}>{dayjs(exp.toDate()).format("DD MMM YYYY")}</div>;
+      const isExpire = dayjs(exp.toDate()).isToday() || exp.toDate() < today
+      return <div className={`${isExpire ? "text-red-500 font-medium" : ""}`}>{dayjs(exp.toDate()).format("DD MMM YYYY")}{isExpire ? " !!!" : ""}</div>;
     },
   },
   {
