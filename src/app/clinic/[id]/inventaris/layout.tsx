@@ -13,7 +13,7 @@ export default function InventoryLayout({
   const params = useParams()
   return (
     <>
-      <Tabs className={`mb-2 ${pathname?.includes("new") || params?.invid !== undefined ? "hidden" : ""} `} value={pathname?.includes("stok") ? "stock" : "default"}>
+      <Tabs className={`mb-2 ${pathname?.includes("new") || params?.invid !== undefined || pathname?.split("/").length === 6 ? "hidden" : ""} `} value={pathname?.includes("stok") ? "stock" : "default"}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="default" onClick={() => router.push(`${basePath}/inventaris`)}>
             Inventaris

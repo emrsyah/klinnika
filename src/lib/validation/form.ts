@@ -148,11 +148,26 @@ export const inventoryFormSchema = z.object({
     type: z.enum(["medicines", "non-medicines"], {
       required_error: "tipe inventaris wajib diisi",
     }),
-    unit_type: z.enum(["tablet" , "pcs" , "pill" , "botol"], {
+    unit_type: z.enum(["tablet", "pcs", "pill", "botol"], {
       required_error: "tipe unit wajib diisi",
     }),
     price: z.number(),
     min: z.number().min(0),
+    desc: z.string().optional(),
+  }),
+});
+
+export const inventoryStockFormSchema = z.object({
+  stock: z.object({
+    inventory_id: z.object(
+      {
+        label: z.string(),
+        value: z.string(),
+      },
+      { required_error: "wajib memilih inventaris" }
+    ),
+    amount: z.number().min(1),
+    expired_at: z.date(),
     desc: z.string().optional(),
   }),
 });
