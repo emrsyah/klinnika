@@ -51,7 +51,7 @@ import { queueFormSchema } from "@/lib/validation/form";
 import toast from "react-hot-toast";
 import { usePathname, useRouter } from "next/navigation";
 
-const keluhanType = [
+export const keluhanType = [
   { value: "Demam", label: "Demam" },
   { value: "Flu", label: "Flu" },
   { value: "Batuk", label: "Batuk" },
@@ -68,7 +68,7 @@ interface Selectable<T> {
   value: T;
 }
 
-const selectableConverter: FirestoreDataConverter<Selectable<string>> = {
+export const selectableConverter: FirestoreDataConverter<Selectable<string>> = {
   toFirestore(
     patientSelectable: WithFieldValue<Selectable<string>>
   ): DocumentData {
@@ -79,10 +79,11 @@ const selectableConverter: FirestoreDataConverter<Selectable<string>> = {
     options: SnapshotOptions
   ): Selectable<string> {
     const data = snapshot.data(options);
+    const dLabel = `${data.name} | Poli ${data.polyclinic}`
     return {
       // id: snapshot.id,
       ...data,
-      label: data.name,
+      label: dLabel,
       value: snapshot.id,
     };
   },
@@ -107,9 +108,9 @@ const AntrianNew = () => {
     where("role", "==", "doctor")
   ).withConverter(selectableConverter);
 
+  const [doctors, loadingDoctor, errorDoctor] = useCollectionData(doctorRef);
   const [patients, loadingPatient, errorPatient] =
     useCollectionData(patientRef);
-  const [doctors, loadingDoctor, errorDoctor] = useCollectionData(doctorRef);
 
   const form = useForm<z.infer<typeof queueFormSchema>>({
     resolver: zodResolver(queueFormSchema),
@@ -507,7 +508,7 @@ const AntrianNew = () => {
                     <FormControl>
                       <Textarea
                         disabled={loading}
-                        placeholder="Tell us a little bit about yourself"
+                        placeholder="Tuliskan deskripsi keluhan disini"
                         className="resize-none"
                         {...field}
                       />
