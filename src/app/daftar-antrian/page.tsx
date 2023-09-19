@@ -115,7 +115,10 @@ const DaftarAntrian = () => {
         id: toastId,
       });
 
-      router.push(`/daftar-antrian?clinic_id=${clinicId}&queue_id=${dataRes.data}`);
+      // DiBAWAH ORDER NUMBER NYA
+      const order_number = dataRes.data.orderNumber
+
+      router.push(`/daftar-antrian?clinic_id=${clinicId}&queue_id=${dataRes.data.queueId}`);
       // router.push(`/${backUrl}`);
     } catch (err) {
       toast.error("Gagal Menambahkan Data", {

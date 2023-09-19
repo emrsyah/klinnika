@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const newQueue = await addDoc(collection(db, "queue"), {
       ...readyToAddQueueFormat,
     });
-    return new NextResponse(JSON.stringify(newQueue.id), {
+    return new NextResponse(JSON.stringify({queueId: newQueue.id, orderNumber: currentQueueLength + 1}), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
