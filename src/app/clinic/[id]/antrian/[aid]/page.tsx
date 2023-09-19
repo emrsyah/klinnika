@@ -14,6 +14,8 @@ import { FinishFormSheet } from "@/components/FinishFormSheet";
 import { Separator } from "@/components/ui/separator";
 import { useMedicinesData } from "./useMedicinesData";
 import { useSession } from "next-auth/react";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 export const queueOptions: QueueOptionType[] = [
   {
@@ -36,6 +38,11 @@ export const queueOptions: QueueOptionType[] = [
     label: "Bayar",
     value: "Bayar",
   },
+  {
+    color: "#a31616",
+    label: "Batal",
+    value: "Batal",
+  },
 ];
 
 const AntrianDetail = () => {
@@ -51,6 +58,7 @@ const AntrianDetail = () => {
   const [openDialog, setOpenDialog] = React.useState<boolean>(false);
   const [openSheet, setOpenSheet] = React.useState<boolean>(false);
   const [nextSelected, setNextSelected] = React.useState(queueOptions[0].value);
+  const [loadingMutate, setLoadingMutate] = React.useState(false);
 
   const typeChangeHandler = (val: any) => {
     if (val.value === selectedType.value) return;
@@ -62,24 +70,53 @@ const AntrianDetail = () => {
     setOpenDialog(true);
   };
 
+  const cancelHandler = async () => {
+    const toastId = toast.loading("Sedang Mengubah Data...");
+    setLoadingMutate(true);
+    try {
+      await axios.patch("/api/antrian-status", {
+        id: queueId,
+        type: "Batal",
+      });
+      toast.success("Berhasil Mengubah Data", {
+        id: toastId,
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal Mengubah Data", {
+        id: toastId,
+      });
+    } finally {
+      setLoadingMutate(false);
+    }
+  };
+
+  console.log(selectedType);
+
   return (
     <div className="flex flex-col gap-4">
-      {selectedType.value === "Selesai Proses" ? (
-        <div className="p-3 font-medium rounded border-2 border-blue-800 bg-blue-100 text-blue-900">
-          Untuk Melanjutkan Proses {` "Selesai Proses" `}, Ada di Menu
-          Pembayaran
-        </div>
-      ) : null}
-      {selectedType.value === "Bayar" ? (
-        <div className="p-3 font-medium rounded border-2 border-blue-800 bg-blue-100 text-blue-900">
-          Proses Antrian ini telah selesai, lihat detailnya di menu pembayaran
-        </div>
+      {queue?.type !== "Batal" ? (
+        <>
+          {selectedType.value === "Selesai Proses" ? (
+            <div className="p-3 font-medium rounded border-2 border-blue-800 bg-blue-100 text-blue-900">
+              Untuk Melanjutkan Proses {` "Selesai Proses" `}, Ada di Menu
+              Pembayaran
+            </div>
+          ) : null}
+          {selectedType.value === "Bayar" ? (
+            <div className="p-3 font-medium rounded border-2 border-blue-800 bg-blue-100 text-blue-900">
+              Proses Antrian ini telah selesai, lihat detailnya di menu
+              pembayaran
+            </div>
+          ) : null}
+        </>
       ) : null}
       <ChangeProgressConfirmationDialog
         current={selectedType.value}
         next={nextSelected}
         open={openDialog}
         setOpen={setOpenDialog}
+        queue_id={queueId!}
       />
       {/* {loadingMed ? ( */}
       <FinishFormSheet
@@ -96,25 +133,40 @@ const AntrianDetail = () => {
       <div className="flit justify-between">
         <h1 className="font-bold text-xl mrt text-blue-400">ID-{queueId}</h1>
         <div className="flit gap-2">
-          <ReactSelect
-            isDisabled={loading || selectedType.value === "Selesai Proses" || selectedType.value === "Bayar"}
-            isClearable={false}
-            isSearchable={false}
-            value={selectedType}
-            isOptionDisabled={(option) => option.value === "Bayar"}
-            onChange={typeChangeHandler}
-            defaultValue={selectedType}
-            styles={colourStyles}
-            options={queueOptions}
-            className="font-medium w-fit"
-          />
+          {selectedType.value === "Batal" ? null : (
+            <ReactSelect
+              isDisabled={
+                loading ||
+                selectedType.value === "Selesai Proses" ||
+                selectedType.value === "Bayar" ||
+                loadingMutate
+              }
+              isClearable={false}
+              isSearchable={false}
+              value={selectedType}
+              isOptionDisabled={(option) =>
+                option.value === "Bayar" || option.value === "Batal"
+              }
+              onChange={typeChangeHandler}
+              defaultValue={selectedType}
+              styles={colourStyles}
+              options={queueOptions}
+              className="font-medium w-fit"
+            />
+          )}
           <Button
             variant={"destructive"}
-            disabled={loading || selectedType.value === "Selesai Proses" || selectedType.value === "Bayar"}
+            disabled={
+              loading ||
+              selectedType.value === "Selesai Proses" ||
+              selectedType.value === "Bayar" || selectedType.value === "Batal" ||
+              loadingMutate
+            }
             type="button"
+            onClick={cancelHandler}
             size={"sm"}
           >
-            Batalkan Antrian
+            {selectedType.value === "Batal" ? "Antrian Telah Dibatalkan" : "Batalkan Antrian"}
           </Button>
         </div>
       </div>
