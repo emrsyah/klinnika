@@ -72,7 +72,7 @@ const PembayaranDetail = () => {
 
   const {queue, loading: loadingQueue, error: errorQueue} = useQueueDataById(params!.payid as string)
 
-  console.log(medicalRecord)
+  // console.log(medicalRecord)
 
   if (loading || loadingTxn || loadingQueue) {
     return <>Loading...</>;

@@ -58,7 +58,7 @@ const DokterDetail = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof doctorFormSchema>) => {
-    console.log(values);
+    // console.log(values);
     const toastId = toast.loading("Sedang Menyimpan Data...");
     setLoading(true);
     try {

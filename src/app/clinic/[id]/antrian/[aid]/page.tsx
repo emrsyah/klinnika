@@ -91,7 +91,7 @@ const AntrianDetail = () => {
     }
   };
 
-  console.log(selectedType);
+  // console.log(selectedType);
 
   return (
     <div className="flex flex-col gap-4">

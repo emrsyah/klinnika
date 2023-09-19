@@ -56,7 +56,7 @@ const InventarisNew = () => {
 
   const onSubmit = async (values: z.infer<typeof inventoryFormSchema>) => {
     setLoading(true);
-    console.log(values);
+    // console.log(values);
     const toastId = toast.loading("Sedang Menambahkan Data...");
     try {
       const formattedInventory = {

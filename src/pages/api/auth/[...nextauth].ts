@@ -26,7 +26,7 @@ export default NextAuth({
       return token;
     },
     async session({ session, user, token }): Promise<Session> {
-      console.log("======== session callbacks ==========");
+      // console.log("======== session callbacks ==========");
       if(token && session.user){
         session.user.clinicId = token.clinicId
         session.user.name = token.name

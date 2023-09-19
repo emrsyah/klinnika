@@ -49,7 +49,7 @@ const InventarisDetail = () => {
   const backUrl = pathname?.split("/").slice(1, 4).join("/");
   const [loading, setLoading] = React.useState<boolean>(false);
   const [inventory, loadingInv, errorInv] = useDocumentData(doc(db, "inventory", invId!))
-  console.log(inventory)
+  // console.log(inventory)
 
   const form = useForm<z.infer<typeof inventoryFormSchema>>({
     resolver: zodResolver(inventoryFormSchema),

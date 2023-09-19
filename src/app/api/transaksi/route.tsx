@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const json = await request.json();
     await addDoc(collection(db, "transaction"), json)
-    console.log(json.medicals[0].expired_at)
+    // console.log(json.medicals[0].expired_at)
     return new NextResponse(JSON.stringify({}), {
       status: 201,
       headers: { "Content-Type": "application/json" },

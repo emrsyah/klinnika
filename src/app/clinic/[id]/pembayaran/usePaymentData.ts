@@ -76,7 +76,7 @@ export function usePaymentData({
       );
     }
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log(snapshot);
+      // console.log(snapshot);
       const observables = snapshot.docs.map((doc) => {
         const data = doc.data();
         const dataId = doc.id;
@@ -121,6 +121,6 @@ export function usePaymentData({
     });
     return () => unsubscribe();
   }, [params]);
-  console.log(combinedData);
+  // console.log(combinedData);
   return { combinedData, loading, error };
 }

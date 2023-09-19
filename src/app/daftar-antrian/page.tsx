@@ -132,8 +132,8 @@ const DaftarAntrian = () => {
 
   React.useEffect(() => {
     if (!loadingClinic && clinic === undefined) {
-      console.log(clinic)
-      console.log(loadingClinic)
+      // console.log(clinic)
+      // console.log(loadingClinic)
       router.push("/");
     }
   }, [loadingClinic, clinic]);

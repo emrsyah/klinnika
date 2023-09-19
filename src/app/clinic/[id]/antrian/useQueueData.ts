@@ -111,6 +111,6 @@ export function useQueueData({params, clinicId} : {params: string, clinicId: str
     });
     return () => unsubscribe();
   }, [params]);
-  console.log(combinedData);
+  // console.log(combinedData);
   return { combinedData, loading, error };
 }

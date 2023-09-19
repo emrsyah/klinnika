@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       })
     })
     const res = await batch.commit()
-    console.log(res)
+    // console.log(res)
     return new NextResponse(JSON.stringify({medical_id: docRef.id}), {
       status: 201,
       headers: { "Content-Type": "application/json" },

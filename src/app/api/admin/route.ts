@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("halo deck")
+    // console.log("halo deck")
     authAdmin
       .createUser({
         email: "user@example.com",
@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
       })
       .then((userRecord) => {
         // See the UserRecord reference doc for the contents of userRecord.
-        console.log("Successfully created new user:", userRecord.uid);
+        // console.log("Successfully created new user:", userRecord.uid);
       })
       .catch((error) => {
-        console.log("Error creating new user:", error);
+        // console.log("Error creating new user:", error);
       });
     //   const docRef = await addDoc(collection(db, "medical_record"), {...json, created_at: serverTimestamp()})
     return new NextResponse(JSON.stringify({}), {

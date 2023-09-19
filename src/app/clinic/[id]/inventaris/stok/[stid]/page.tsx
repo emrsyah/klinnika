@@ -51,7 +51,7 @@ const InventarisStokDetail = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
 
   const { stock, loading: loadingStock, error } = useStockDataDetail(stockId!);
-  console.log(stock);
+  // console.log(stock);
 
   const inventoryRef = query(
     collection(db, "inventory"),
