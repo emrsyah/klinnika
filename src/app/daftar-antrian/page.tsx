@@ -111,14 +111,29 @@ const DaftarAntrian = () => {
       const dataRes = await axios.post("/api/antrian", {
         ...formattedQueue,
       });
-      toast.success("Berhasil Menambahkan Data | Check Pesan dari Bot Untuk Info Lanjut", {
-        id: toastId,
+      toast.success(
+        "Berhasil Menambahkan Data | Check Pesan dari Bot Untuk Info Lanjut",
+        {
+          id: toastId,
+        }
+      );
+
+      const order_number = dataRes.data.orderNumber;
+      const date = values.complaint.appointmentDate;
+      const qrApi = axios.create({
+        baseURL: "http://192.168.66.172:8000",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      await qrApi.post("/send-message", {
+        number: values.patient.phone,
+        message: `Halo, ${values.patient.name}! \n\nTerima kasih telah mendaftar di ${clinic.name}.\n\nBerikut adalah informasi antrian Anda:\n\nNama: ${values.patient.name}\nNomor Antrian: ${order_number}\nHari: ${date}`,
       });
 
-      // DiBAWAH ORDER NUMBER NYA
-      const order_number = dataRes.data.orderNumber
-
-      router.push(`/daftar-antrian?clinic_id=${clinicId}&queue_id=${dataRes.data.queueId}`);
+      router.push(
+        `/daftar-antrian?clinic_id=${clinicId}&queue_id=${dataRes.data.queueId}`
+      );
       // router.push(`/${backUrl}`);
     } catch (err) {
       toast.error("Gagal Menambahkan Data", {
@@ -148,7 +163,7 @@ const DaftarAntrian = () => {
     );
   }
 
-  return (queueId !== undefined && queueId !== null) ? (
+  return queueId !== undefined && queueId !== null ? (
     <div className="max-w-xl my-6 mx-auto border p-4 rounded">
       {loadingQueue ? (
         <h1 className="text-2xl mrt font-bold text-blue-500 animate-bounce">
@@ -156,7 +171,9 @@ const DaftarAntrian = () => {
         </h1>
       ) : (
         <h1 className="text-2xl mrt font-bold text-blue-500 animate-bounce">
-          {queue == undefined ? `Tak Ditemukan Data | Id: ${queueId}` : `Antrian Ke: ${queue.order_number ?? "-"} | ${queueId} `}
+          {queue == undefined
+            ? `Tak Ditemukan Data | Id: ${queueId}`
+            : `Antrian Ke: ${queue.order_number ?? "-"} | ${queueId} `}
         </h1>
       )}
     </div>
