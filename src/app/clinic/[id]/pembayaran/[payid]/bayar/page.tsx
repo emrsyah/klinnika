@@ -211,7 +211,7 @@ const PembayaranProcessPage = () => {
               <div className="flit justify-between">
                 <div className="flex flex-col gap-1">
                   <h1 className="font-semibold mrt text-blue-600">
-                    Fee Dookter
+                    Fee Dokter
                   </h1>
                   <p className="font-medium text-gray-500 text-sm">
                     {combinedData?.doctor?.name} |{" "}
