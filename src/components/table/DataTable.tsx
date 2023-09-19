@@ -239,7 +239,7 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   onClick={
                     
-                    () => router.push(pathname! + "/" + row.getValue("id") + `${isBayar ? "/bayar" : ""}`)
+                    () => router.push(pathname! + "/" + row.getValue("id") + `${row.getValue("type") === "Selesai Proses" && isBayar ? "/bayar" : ""}`)
                     // console.log(row.get)
                   }
                   data-state={row.getIsSelected() && "selected"}

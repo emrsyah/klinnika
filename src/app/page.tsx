@@ -1,10 +1,13 @@
+"use client"
 import NextImage from "@/components/NextImage";
 import NavUnauthenticated from "@/components/layout/NavUnauthenticated";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 import doctor_img from "~/doc_idx.svg";
 
 export default function Home() {
+  const router = useRouter()
   return (
     <div className={"mx-12 my-8"}>
       <NavUnauthenticated />
@@ -17,7 +20,7 @@ export default function Home() {
         <p className="font-medium text-gray-500">
           Atur pasien, obat-obatan, dokter, dan lainnya dengan mudah dan gratis!
         </p>
-        <Button className="font-bold text-lg mt-6">
+        <Button onClick={() => router.push("login")} className="font-bold text-lg mt-6">
           Upgrade Klinikmu Sekarang, Gratis!
         </Button>
         <NextImage

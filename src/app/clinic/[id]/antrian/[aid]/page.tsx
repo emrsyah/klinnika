@@ -70,6 +70,11 @@ const AntrianDetail = () => {
           Pembayaran
         </div>
       ) : null}
+      {selectedType.value === "Bayar" ? (
+        <div className="p-3 font-medium rounded border-2 border-blue-800 bg-blue-100 text-blue-900">
+          Proses Antrian ini telah selesai, lihat detailnya di menu pembayaran
+        </div>
+      ) : null}
       <ChangeProgressConfirmationDialog
         current={selectedType.value}
         next={nextSelected}
@@ -92,7 +97,7 @@ const AntrianDetail = () => {
         <h1 className="font-bold text-xl mrt text-blue-400">ID-{queueId}</h1>
         <div className="flit gap-2">
           <ReactSelect
-            isDisabled={loading || selectedType.value === "Selesai Proses"}
+            isDisabled={loading || selectedType.value === "Selesai Proses" || selectedType.value === "Bayar"}
             isClearable={false}
             isSearchable={false}
             value={selectedType}
@@ -105,7 +110,7 @@ const AntrianDetail = () => {
           />
           <Button
             variant={"destructive"}
-            disabled={loading || selectedType.value === "Selesai Proses"}
+            disabled={loading || selectedType.value === "Selesai Proses" || selectedType.value === "Bayar"}
             type="button"
             size={"sm"}
           >

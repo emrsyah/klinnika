@@ -12,7 +12,7 @@ const NavUnauthenticated = () => {
       <AppIcon />
       <div className="flit gap-4">
         <Button onClick={() => push("/login")} variant={"outline"}>Masuk</Button>
-        <Button>Daftar Sekarang</Button>
+        {/* <Button>Daftar Sekarang</Button> */}
       </div>
     </div>
   );

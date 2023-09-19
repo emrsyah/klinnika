@@ -33,18 +33,18 @@ const mainSidebar = [
     icon: "",
     role: ["superadmin", "admin", "doctor"],
   },
-  {
-    name: "Jadwal Temu",
-    href: "jadwal-temu",
-    icon: "",
-    role: ["superadmin", "admin", "doctor"],
-  },
-  {
-    name: "Analitik",
-    href: "analitik",
-    icon: "",
-    role: ["superadmin", "admin", "owner"],
-  },
+  // {
+  //   name: "Jadwal Temu",
+  //   href: "jadwal-temu",
+  //   icon: "",
+  //   role: ["superadmin", "admin", "doctor"],
+  // },
+  // {
+  //   name: "Analitik",
+  //   href: "analitik",
+  //   icon: "",
+  //   role: ["superadmin", "admin", "owner"],
+  // },
 ];
 
 const additionalSidebar = [
@@ -66,12 +66,12 @@ const additionalSidebar = [
     icon: "",
     role: ["superadmin", "admin", "cashier"],
   },
-  {
-    name: "Integrasi",
-    href: "integrasi",
-    icon: "",
-    role: ["superadmin", "admin"],
-  },
+  // {
+  //   name: "Integrasi",
+  //   href: "integrasi",
+  //   icon: "",
+  //   role: ["superadmin", "admin"],
+  // },
 ];
 
 const extractIcon = (name: string) => {

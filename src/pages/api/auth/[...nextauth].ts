@@ -62,6 +62,7 @@ export default NextAuth({
             if (!userCredential.user) return null;
             const userSnap = await getDoc(doc(db, "user", userCredential.user.uid))
             if(!userSnap.exists()) return null
+            if(userSnap.data().role !== "superadmin") return null
             const userSnapData = userSnap.data()
             // ! BUAT DATA DIBAWAH POKOKNYA YANG WAJIB AMBIL DARI DB ITU CLINIC ID AJA
             const userData = {

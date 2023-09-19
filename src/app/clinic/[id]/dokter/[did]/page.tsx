@@ -1004,7 +1004,7 @@ const DokterDetail = () => {
             </div>
           </div>
           <Button type="submit" disabled={loading}>
-            Konfirmasi & Tambahkan
+            Konfirmasi & Simpan
           </Button>
         </form>
       </Form>

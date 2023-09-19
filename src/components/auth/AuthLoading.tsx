@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AppIcon from "@/components/AppIcon";
 
-const HOME_ROUTE = "/test";
+const HOME_ROUTE = "/";
 /**
  * Add role-based access control to a component
  *
