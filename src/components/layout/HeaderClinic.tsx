@@ -23,9 +23,9 @@ const HeaderClinic = () => {
       <div className="text-xl font-bold mrt text-blue-900">
         {extractHeaderTitle(currentPath as string)}
       </div>
-      <Button size={"icon"} variant={"outline"}>
+      {/* <Button size={"icon"} variant={"outline"}>
         <Bell width={20} />
-      </Button>
+      </Button> */}
     </div>
   );
 };
