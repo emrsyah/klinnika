@@ -40,7 +40,13 @@ function getDoctorData(doctor_id: string) {
   );
 }
 
-export function useQueueData({params, clinicId} : {params: string, clinicId: string}) {
+export function usePaymentData({
+  params = "default",
+  clinicId,
+}: {
+  params?: string;
+  clinicId: string;
+}) {
   const [combinedData, setCombinedData] = React.useState<any[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
@@ -60,6 +66,7 @@ export function useQueueData({params, clinicId} : {params: string, clinicId: str
       orderBy("appointment_date", "desc"),
       orderBy("created_at", "asc"),
       where("clinic_id", "==", clinicId),
+      where("type", "in", ["Selesai Proses", "Bayar"])
     );
     if (params === "focus") {
       q = query(
@@ -69,6 +76,7 @@ export function useQueueData({params, clinicId} : {params: string, clinicId: str
       );
     }
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log(snapshot);
       const observables = snapshot.docs.map((doc) => {
         const data = doc.data();
         const dataId = doc.id;
@@ -86,9 +94,11 @@ export function useQueueData({params, clinicId} : {params: string, clinicId: str
             doctor,
           })),
           catchError((err) => {
-            console.error(err)
+            console.error(err);
             setLoading(false);
-            setError("Something Error Happened - Fetching Patient Or Doctor Data");
+            setError(
+              "Something Error Happened - Fetching Patient Or Doctor Data"
+            );
             return of(null);
           })
         );
@@ -97,7 +107,7 @@ export function useQueueData({params, clinicId} : {params: string, clinicId: str
         .pipe(
           startWith([]),
           catchError((error) => {
-            console.error(error)
+            console.error(error);
             setLoading(false);
             setError("Something Error Happened - Fetching Queue");
             return of([]);

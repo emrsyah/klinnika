@@ -12,21 +12,8 @@ import { db } from "../../../../lib/firebase";
 export async function POST(request: NextRequest) {
   try {
     const json = await request.json();
-    const formatted = {
-      stock: {
-        ...json.stock,
-        expired_at: new Date(json.stock.expired_at),
-      },
-    };
-    inventoryStockFormSchema.parse(formatted);
-    await addDoc(collection(db, "inventory_stock"), {
-      inventory_id: json.stock.inventory_id.value,
-      amount: json.stock.amount,
-      desc: json.stock.desc,
-      expired_at: new Date(json.stock.expired_at),
-      clinic_id: json.clinicId,
-      created_at: serverTimestamp(),
-    });
+    await addDoc(collection(db, "transaction"), json)
+    console.log(json.medicals[0].expired_at)
     return new NextResponse(JSON.stringify({}), {
       status: 201,
       headers: { "Content-Type": "application/json" },

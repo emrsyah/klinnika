@@ -154,6 +154,7 @@ export function FinishFormSheet({
           desc: med.medDesc,
           inventory_id: med.inventory_id,
           expired_at: med.expired_at,
+          price: med.info.price
         };
       });
       const {data} = await axios.post("/api/medical", {

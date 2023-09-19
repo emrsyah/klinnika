@@ -53,7 +53,9 @@ interface DataTableProps<TData, TValue> {
   filterValue: string;
   isLoading: boolean;
   isError: string;
-  focusMode?: boolean
+  focusMode?: boolean;
+  dontShowAdd?: boolean;
+  isBayar?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -63,7 +65,9 @@ export function DataTable<TData, TValue>({
   filterValue,
   isLoading,
   isError,
-  focusMode= false
+  focusMode = false,
+  dontShowAdd = false,
+  isBayar = false,
 }: DataTableProps<TData, TValue>) {
   const params = useSearchParams()!;
   const pathname = usePathname();
@@ -152,20 +156,20 @@ export function DataTable<TData, TValue>({
             Reset Default
           </Button>
           {focusMode ? (
-          <Select value={mode as string} onValueChange={changeModeHandler}>
-            <SelectTrigger className="w-fit gap-2 font-semibold text-blue-900">
-              <SelectValue className="whitespace-nowrap" placeholder="Mode" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="focus">Mode Fokus</SelectItem>
-                <SelectItem value="all">Semuanya</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            <Select value={mode as string} onValueChange={changeModeHandler}>
+              <SelectTrigger className="w-fit gap-2 font-semibold text-blue-900">
+                <SelectValue className="whitespace-nowrap" placeholder="Mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="focus">Mode Fokus</SelectItem>
+                  <SelectItem value="all">Semuanya</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           ) : null}
         </div>
-        <div className="flit gap-4 w-full">
+        <div className="flit gap-4 w-full justify-end">
           <Input
             placeholder={`Filter dengan ${filterLabel}...`}
             value={
@@ -176,14 +180,18 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
           />
-          <Button
-            onClick={() => router.push(pathname + "/new")}
-            size={"sm"}
-            className="w-fit gap-2 whitespace-nowrap"
-          >
-            <Plus size={20} />
-            Tambahkan Baru
-          </Button>
+          {dontShowAdd ? null : (
+            <Button
+              onClick={() => router.push(pathname + "/new")}
+              size={"sm"}
+              className={`w-fit gap-2 whitespace-nowrap ${
+                dontShowAdd ? "hidden" : ""
+              }`}
+            >
+              <Plus size={20} />
+              Tambahkan Baru
+            </Button>
+          )}
         </div>
       </div>
       <div className="rounded-md border mt-4">
@@ -229,9 +237,9 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-
-                  onClick={() =>
-                    router.push(pathname! + "/" + row.getValue("id"))
+                  onClick={
+                    
+                    () => router.push(pathname! + "/" + row.getValue("id") + `${isBayar ? "/bayar" : ""}`)
                     // console.log(row.get)
                   }
                   data-state={row.getIsSelected() && "selected"}

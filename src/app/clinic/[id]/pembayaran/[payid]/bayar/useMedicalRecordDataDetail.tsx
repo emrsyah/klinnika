@@ -1,4 +1,3 @@
-import { db } from "../../../../../lib/firebase";
 import * as React from "react";
 import {
   collection,
@@ -10,6 +9,7 @@ import {
   where,
 } from "firebase/firestore";
 import { catchError, combineLatest, from, map, of, startWith } from "rxjs";
+import { db } from "../../../../../../../lib/firebase";
 
 interface DocumentWithUser<T> {
   id: string;
@@ -24,8 +24,8 @@ interface User {
 }
 
 // Function to fetch user data by user_id
-function getUserData(patient_id: string) {
-  return from(getDoc(doc(db, "patient", patient_id))).pipe(
+function getMedicalData(patient_id: string) {
+  return from(getDoc(doc(db, "medical", patient_id))).pipe(
     map((userDoc) => {
       return { id: userDoc.id, ...userDoc.data() };
     })
@@ -40,55 +40,43 @@ function getDoctorData(doctor_id: string) {
   );
 }
 
-export function useQueueData({params, clinicId} : {params: string, clinicId: string}) {
-  const [combinedData, setCombinedData] = React.useState<any[]>([]);
+export function useMedicalRecordDataDetail({
+  queueId,
+}: {
+  queueId: string;
+}) {
+  const [combinedData, setCombinedData] = React.useState<any>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
 
-  //   URUSIN ORDERBY APPOINTMENT DATE
-
   React.useEffect(() => {
-    let today = new Date();
-    today.setHours(0, 0, 0, 0);
-    let tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    today.setHours(0, 0, 0, 0);
-    let todayEnd = new Date();
-    todayEnd.setHours(23, 59, 59, 999);
     let q = query(
-      collection(db, "queue"),
-      orderBy("appointment_date", "desc"),
-      orderBy("created_at", "asc"),
-      where("clinic_id", "==", clinicId),
+      collection(db, "medical_record"),
+      where("queue_id", "==", queueId),
     );
-    if (params === "focus") {
-      q = query(
-        q,
-        where("appointment_date", ">=", today),
-        where("appointment_date", "<=", todayEnd)
-      );
-    }
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const observables = snapshot.docs.map((doc) => {
         const data = doc.data();
         const dataId = doc.id;
-        const patientId = data.patient_id;
-        const doctorId = data.doctor_id;
+        const medicalId = data.medical_id;
+        const docId = data.doc_id
 
-        const patientObservable = getUserData(patientId);
-        const doctorObservable = getDoctorData(doctorId);
+        const medicalObservable = getMedicalData(medicalId);
+        const doctorObservable = getDoctorData(docId);
 
-        return combineLatest([patientObservable, doctorObservable]).pipe(
-          map(([patient, doctor]) => ({
+        return combineLatest([medicalObservable, doctorObservable]).pipe(
+          map(([medical, doctor]) => ({
             id: dataId,
             ...data,
-            patient,
+            medical,
             doctor,
           })),
           catchError((err) => {
-            console.error(err)
+            console.error(err);
             setLoading(false);
-            setError("Something Error Happened - Fetching Patient Or Doctor Data");
+            setError(
+              "Something Error Happened - Fetching Medical Or Doctor Data"
+            );
             return of(null);
           })
         );
@@ -97,20 +85,19 @@ export function useQueueData({params, clinicId} : {params: string, clinicId: str
         .pipe(
           startWith([]),
           catchError((error) => {
-            console.error(error)
+            console.error(error);
             setLoading(false);
-            setError("Something Error Happened - Fetching Queue");
+            setError("Something Error Happened - Fetching Medical Record");
             return of([]);
           })
         )
         .subscribe((results) => {
           // console.log(results)
           setLoading(false);
-          setCombinedData(results);
+          setCombinedData(results[0]);
         });
     });
     return () => unsubscribe();
-  }, [params]);
-  console.log(combinedData);
+  }, []);
   return { combinedData, loading, error };
 }
