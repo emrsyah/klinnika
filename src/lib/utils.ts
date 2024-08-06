@@ -3,9 +3,9 @@ import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { DocumentData, QuerySnapshot, Timestamp } from "firebase/firestore";
 dayjs.extend(relativeTime);
 dayjs.extend(isToday);
+import { DocumentData, QuerySnapshot, Timestamp } from "firebase/firestore";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
